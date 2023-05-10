@@ -1,6 +1,4 @@
 Flask~=2.3.2
 Flask-SQLAlchemy~=3.0.3
-PyMySQL~=1.0.3
-asyncpg~=0.27.0
 psycopg2~=2.9.6
 slippy-api~=0.3
