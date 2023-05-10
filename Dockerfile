@@ -31,5 +31,8 @@ ENV FLASK_APP=index.py
 # Copy to /etc/environment
 RUN env >> /etc/environment
 
+RUN mv entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start"]
