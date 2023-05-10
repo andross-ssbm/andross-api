@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>User ID</th>
+            <th>Position</th>
+            <th>Elo</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>DRP</th>
+            <th>Entry Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in leaderboard_data %}
+            <tr>
+                <td>{{ record.position }}</td>
+                <td>{{ record.user_id }}</td>
+                <td>{{ record.position }}</td>
+                <td>{{ record.elo }}</td>
+                <td>{{ record.wins }}</td>
+                <td>{{ record.losses }}</td>
+                <td>{{ record.drp }}</td>
+                <td>{{ record.entry_time }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

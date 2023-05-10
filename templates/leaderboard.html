@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+  <h1>Michigan Slippi Leaderboard</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Position</th>
+        <th>Rank</th>
+        <th>Tag</th>
+        <th>Elo</th>
+        <th>Characters</th>
+        <th>Win/Loss</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          {% set rank = get_rank(user.latest_elo, user.latest_drp).replace(' ', '_') %}
+          {% set rank_name = get_rank(user.latest_elo, user.latest_drp) %}
+          {% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
+          <td class="rank_img_column">
+            <div>
+              <img class="rank_img" src="{{ url_for('static', filename='images/ranks/' + rank + '.svg') }}" alt="{{ rank_name }}">
+            </div>
+            <div>{{ rank_name }}</div>
+          </td>
+          <td><a href="{{ url }}"> {{ user.name }} </a>
+            <div>{{ user.cc }}</div>
+          </td>
+          <td>{{ "{:.2f}".format(user.latest_elo) }}</td>
+          <td class="character-image-column">
+            {% set total_games = characters[loop.index - 1] | sum(attribute='game_count') %}
+            {% for character in characters[loop.index - 1] %}
+              {% if character %}
+              <span>
+                <img class="character-image" src="{{ url_for('static', filename='images/characters/' + character.character_info.name + '.png') }}"
+                   title="Game count: {{ character.game_count }}&#013;Percentage: {{ '%.2f'|format((character.game_count/total_games)*100) }}%">
+              </span>
+              {% endif %}
+            {% endfor %}
+          </td>
+          <td class="divider_text">
+            <span class="win_text">{{ user.latest_wins }}</span> / <span class="loss_text">{{ user.latest_losses }}</span>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
