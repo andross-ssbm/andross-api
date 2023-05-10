@@ -12,7 +12,7 @@ RUN apt-get install -y git cron vim
 RUN git clone https://github.com/ConstObject/andross-api.git
 
 # Set working directory to the cloned directory
-WORKDIR /andross-api
+WORKDIR /andross-api/
 
 # Update pip and install required dependencies
 RUN pip install --upgrade pip
