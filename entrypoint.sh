@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "start" ]; then
-    flask run
+    gunicorn wsgi:app
 elif [ "$1" == "shell" ]; then
     /bin/bash
 else
