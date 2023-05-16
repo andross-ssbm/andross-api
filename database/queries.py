@@ -50,9 +50,48 @@ def create_user():
     return {'message': 'User created successfully'}, 201
 
 
+@require_api_key
+def update_user():
+    user_id = request.args.get('id')
+    cc = request.args.get('cc')
+    name = request.args.get('name')
+
+    if not user_id:
+        abort(400, 'Missing required parameter (id)')
+
+    user = db.get_or_404(User, user_id, description='User not found')
+    if cc:
+        if not SlippiRankedAPI.is_valid_connect_code(cc):
+            abort(400, 'Invalid connect code')
+        user.cc = cc
+        db.session.commit()
+
+    if name:
+        if len(name) > 12:
+            abort(400, 'Name is too long, please provide a name shorter than 12')
+        user.name = name
+        db.session.commit()
+
+    return {'message': 'User updated successfully'}, 201
+
+
 def get_users():
     users = User.query.all()
     return [user.to_dict() for user in users]
+
+
+def get_user():
+    user_id = request.args.get('id')
+    cc = request.args.get('cc')
+
+    if not user_id:
+        abort(400, 'Missing required parameter (id)')
+
+    user = User.query.filter(db.or_(User.id == user_id, User.cc == cc)).first()
+    if not user:
+        abort(404, f'Unable to find user for ({user_id}, {cc})')
+
+    return user.to_dict()
 
 
 def get_users_by_id():
@@ -202,6 +241,19 @@ def create_drp():
     db.session.commit()
 
     return {'message': 'drp entry created successfully'}, 200
+
+
+def get_latest_leaderboard_entry():
+    user_id = request.args.get('id')
+
+    if not user_id:
+        abort(400, 'Missing require argument (id)')
+
+    lbe = Leaderboard.query.filter(Leaderboard.user_id == int(user_id)).order_by(Leaderboard.entry_time.desc()).first()
+    if not lbe:
+        abort(404, f'Unable to get latest leaderboard entry for ({user_id})')
+
+    return lbe.to_dict()
 
 
 def get_leaderboard():

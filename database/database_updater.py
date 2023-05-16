@@ -127,4 +127,4 @@ def update_database():
                 local_user.main_id = main_id
                 db.session.commit()
 
-    return {'message': 'Updated database successfully'}, 200
+    return {'message': 'Updated database successfully'}, 201
