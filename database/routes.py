@@ -3,7 +3,7 @@ from database.queries import get_users, get_users_by_id, get_users_by_cc, \
     get_elo_by_user_id, get_elo, get_latest_elo, get_latest_characters, \
     get_leaderboard, get_leaderboard_website, create_user, create_elo, create_win_loss, create_drp, create_entry_date, \
     get_user, get_latest_leaderboard_entry, update_user
-from database.database_updater import update_database
+from database.database_updater import update_database, update_leaderboard
 
 database_blueprint = Blueprint('database_blueprint', __name__)
 
@@ -22,6 +22,7 @@ database_blueprint.route("/entry_date/", methods=['POST'])(create_entry_date)
 database_blueprint.route("/win_loss/", methods=['POST'])(create_win_loss)
 database_blueprint.route("/drp/", methods=['POST'])(create_drp)
 database_blueprint.route("/update/", methods=['POST'])(update_database)
+database_blueprint.route("/update_leaderboard/", methods=['POST'])(update_leaderboard)
 database_blueprint.route("/get_lbe/", methods=['GET'])(get_latest_leaderboard_entry)
 database_blueprint.route("/get_leaderboard/", methods=['GET'])(get_leaderboard)
 database_blueprint.route("/leaderboard")(get_leaderboard_website)

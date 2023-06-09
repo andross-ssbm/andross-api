@@ -16,6 +16,49 @@ logger = logging.getLogger(f'andross.{__name__}')
 
 
 @require_api_key
+def update_leaderboard():
+    logger.info('update_leaderboard')
+
+    slippi_api = SlippiRankedAPI()
+
+    current_time = datetime.utcnow()
+    entry_date = EntryDate(entry_time=current_time)
+    db.session.add(entry_date)
+    db.session.commit()
+
+    users_list = User.query.all()
+    if not users_list:
+        abort(400, 'Unable to get users')
+
+    ranked_data = [(user, slippi_api.get_player_ranked_data(user.cc)) for user in users_list]
+    if not ranked_data:
+        abort(400, 'Unable to get slippi data')
+
+    logger.info('Sorting users')
+    sorted_ranked_data = sorted([(user, slippi_user) for user, slippi_user in ranked_data if slippi_user],
+                                key=lambda x: x[1].ranked_profile.rating_ordinal, reverse=True)
+
+    counter = 1
+    for user in sorted_ranked_data:
+        local_user = user[0]
+        slippi_data = user[1]
+
+        if slippi_data.ranked_profile.wins or slippi_data.ranked_profile.losses:
+            leadboard_entry = Leaderboard(user_id=local_user.id,
+                                          position=counter,
+                                          elo=slippi_data.ranked_profile.rating_ordinal,
+                                          wins=slippi_data.ranked_profile.wins,
+                                          losses=slippi_data.ranked_profile.losses,
+                                          drp=slippi_data.ranked_profile.daily_regional_placement,
+                                          entry_time=current_time)
+            db.session.add(leadboard_entry)
+            db.session.commit()
+            counter += 1
+
+    return {'message': 'Updated leaderboard'}, 201
+
+
+@require_api_key
 def update_database():
     logger.info('update_database')
 

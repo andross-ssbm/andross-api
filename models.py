@@ -99,7 +99,7 @@ class EntryDate(db.Model):
     __tablename__ = 'entry_date'
 
     entry_time: db.Mapped[datetime] = db.Column(db.DateTime, primary_key=True,
-                                                default=datetime.utcnow().replace(microsecond=0))
+                                                default=datetime.utcnow())
 
     def to_dict(self):
         return {
