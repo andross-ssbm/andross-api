@@ -80,7 +80,7 @@ def update_database():
     if not ranked_data:
         abort(400, 'Unable to get slippi data')
 
-    for entry in ranked_data:
+    for entry in [[user, slippi_data] for user, slippi_data in ranked_data if slippi_data]:
         local_user = entry[0]
         slippi_user = entry[1]
 
@@ -122,7 +122,7 @@ def update_database():
 
         # Create dgp entry if latest dgp entry for user doesn't match slippi data
         if slippi_user.ranked_profile.daily_global_placement:
-            latest_dgp = DGP.query.filter_by(DGP.user_id == local_user.id).order_by(DGP.entry_time.desc()).first()
+            latest_dgp = DGP.query.filter(DGP.user_id == local_user.id).order_by(DGP.entry_time.desc()).first()
 
             if latest_dgp:
                 if latest_dgp.placement != slippi_user.ranked_profile.daily_global_placement:
