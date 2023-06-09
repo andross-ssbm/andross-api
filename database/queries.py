@@ -249,3 +249,37 @@ def get_leaderboard_website():
     users = User.query.order_by(User.latest_elo.desc()).all()
     characters = [user.get_latest_characters() or [] for user in users]
     return render_template('leaderboard.html', users=users, get_rank=get_rank, characters=characters)
+
+
+def get_leaderboard_website_fast():
+    sql_query = '''SELECT ce.*, cl.name AS character_name
+FROM users u
+LEFT JOIN (
+    SELECT ce.*
+    FROM public.character_entry ce
+    INNER JOIN (
+        SELECT user_id, MAX(entry_time) AS max_entry_time
+        FROM public.character_entry
+        GROUP BY user_id
+    ) ce_max ON ce.user_id = ce_max.user_id AND ce.entry_time = ce_max.max_entry_time
+    LEFT JOIN character_list cl ON ce.character_id = cl.id
+) ce ON u.id = ce.user_id
+LEFT JOIN character_list cl ON ce.character_id = cl.id;
+'''
+    users = User.query.order_by(User.latest_elo.desc()).all()
+    results = db.session.execute(db.text(sql_query)).all()
+    character_dict_list = {}
+    for item in results:
+        main_key = item[1]  # Using the second index as the main key
+        if main_key not in character_dict_list:
+            character_dict_list[main_key] = []
+        character_dict_list[main_key].append({
+            'id': item[0],
+            'user_id': item[1],
+            'character_id': item[2],
+            'game_count': item[3],
+            'entry_time': item[4],
+            'name': item[5]
+        })
+    return render_template('leaderboard_fast.html', users=users, get_rank=get_rank, characters=character_dict_list)
+
