@@ -28,11 +28,11 @@ def update_leaderboard():
 
     users_list = User.query.all()
     if not users_list:
-        abort(400, 'Unable to get users')
+        return {'error_message': 'Unable to get users'}, 404
 
     ranked_data = [(user, slippi_api.get_player_ranked_data(user.cc)) for user in users_list]
     if not ranked_data:
-        abort(400, 'Unable to get slippi data')
+        return {'error_message': 'Unable to get slippi data'}, 404
 
     logger.info('Sorting users')
     sorted_ranked_data = sorted([(user, slippi_user) for user, slippi_user in ranked_data if slippi_user],
@@ -74,11 +74,11 @@ def update_database():
     # Loop through all users and get their ranked data, when unable to get users abort
     users_list = User.query.all() if not user_id else User.query.filter(User.id == int(user_id)).all()
     if not users_list:
-        abort(400, 'Unable to get users')
+        return {'error_message': 'Unable to get users'}, 404
 
     ranked_data = [[user, slippi_api.get_player_ranked_data(user.cc)] for user in users_list]
     if not ranked_data:
-        abort(400, 'Unable to get slippi data')
+        return {'error_message': 'Unable to get slippi data'}, 404
 
     for entry in [[user, slippi_data] for user, slippi_data in ranked_data if slippi_data]:
         local_user = entry[0]

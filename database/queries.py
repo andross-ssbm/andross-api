@@ -99,7 +99,7 @@ def create_elo():
     entry_time = request.args.get('entry_time')
 
     if not user_id or not elo or not entry_time:
-        abort(400, 'Missing required parameter (user_id, elo, entry_time)')
+        return {'error_message': 'Missing required paramter (user_id, elo, entry_time).'}
 
     entry_time = datetime.strptime(entry_time, '%Y-%m-%d %H:%M:%S.%f')
 
@@ -124,21 +124,21 @@ def get_elo():
         .order_by(Elo.entry_time.desc()).all()
 
     if not elo_entries:
-        abort(404, f'Unable to find elo entries for the given values ({user_id}, {start_date}, {end_date})')
+        return {
+            'error_message': f'Unable to find elo entries for the given values({user_id}, {start_date}, {end_date})'
+        }, 404
 
     return [elo.to_dict() for elo in elo_entries]
 
 
-def get_elo_by_user_id():
-    elo_entries = Elo.query.filter_by(user_id=request.args.get('user_id')).all()
+def get_elo_by_user_id(user_id: int):
+    elo_entries = Elo.query.filter_by(user_id=user_id).all()
     if not elo_entries:
-        abort(404, f'Unable to find elo entries with user_id {request.args.get("user_id")}')
+        return {'error_message': f'Unable to find elo entries with user_id {user_id}'}, 404
     return [elo.to_dict() for elo in elo_entries]
 
 
-def get_latest_elo():
-    user_id = request.args.get('user_id')
-
+def get_latest_elo(user_id: int):
     if not user_id:
         latest_elo_entry = db.session.query(Elo).order_by(Elo.entry_time.desc())
     else:
@@ -147,26 +147,23 @@ def get_latest_elo():
     latest_elo_entry = latest_elo_entry.first()
 
     if not latest_elo_entry:
-        abort(404, f'Unable to find latest elo entry')
+        return {'error_message': 'Unable to find latest elo entry'}, 404
 
     return latest_elo_entry.to_dict()
 
 
-def get_latest_characters():
-    user_id = request.args.get('user_id')
-    if not user_id:
-        abort(400, 'Required parameter user_id is missing')
+def get_latest_characters(user_id: int):
 
     latest_character = db.session.query(CharactersEntry)\
         .where(CharactersEntry.user_id == int(user_id)).order_by(CharactersEntry.entry_time.desc()).first()
     if not latest_character:
-        abort(404, f'No character entries for given user_id {user_id}')
+        return {'error_message': f'No character entries for given user_id {user_id}'}
 
     latest_characters_entries = db.session.query(CharactersEntry)\
         .where(db.and_(CharactersEntry.user_id == user_id, CharactersEntry.entry_time == latest_character.entry_time))\
         .order_by(CharactersEntry.game_count.desc()).all()
     if not latest_characters_entries:
-        abort(500, f'Was unable to get latest characters for given user_id {user_id}')
+        return {'error_message': f'Was unable to get latest characters for given user_id {user_id}'}, 500
 
     return [character.to_dict() for character in latest_characters_entries]
 
@@ -176,7 +173,7 @@ def create_entry_date():
     entry_time = request.args.get('entry_time')
 
     if not entry_time:
-        abort(400, 'Missing required parameter entry_time')
+        return {'error_message': 'Missing required paramter entry_time.'}
 
     entry_time = datetime.strptime(entry_time, '%Y-%m-%d %H:%M:%S.%f')
 
@@ -196,7 +193,7 @@ def create_win_loss():
     entry_time = request.args.get('entry_time')
 
     if not user_id or not wins or not losses or not entry_time:
-        abort(400, 'Missing a required parameter (user_id, wins, losses, entry_time)')
+        return {'error_message': 'Missing a required parameter (user_id, wins, losses, entry_time).'}, 400
 
     entry_time = datetime.strptime(entry_time, '%Y-%m-%d %H:%M:%S.%f')
 
@@ -214,7 +211,7 @@ def create_drp():
     entry_time = request.args.get('entry_time')
 
     if not user_id or not drp or not entry_time:
-        abort(400, 'Missing required parameter (user_id, drp, entry_time)')
+        return {'error_message': 'Missing require paramter (user_id, drp, entry_time).'}, 400
 
     entry_time = datetime.strptime(entry_time, '%Y-%m-%d %H:%M:%S.%f')
 
@@ -229,11 +226,11 @@ def get_latest_leaderboard_entry():
     user_id = request.args.get('id')
 
     if not user_id:
-        abort(400, 'Missing require argument (id)')
+        return {'error_message': 'Missing required argument (id).'}, 400
 
     lbe = Leaderboard.query.filter(Leaderboard.user_id == int(user_id)).order_by(Leaderboard.entry_time.desc()).first()
     if not lbe:
-        abort(404, f'Unable to get latest leaderboard entry for ({user_id})')
+        return {'error_message': f'Unable to get latest leaderboard entry for ({user_id})'}, 404
 
     return lbe.to_dict()
 
