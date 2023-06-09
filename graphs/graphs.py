@@ -1,15 +1,18 @@
 import os
 import logging
+
+import matplotlib
 from matplotlib import pyplot, dates, cycler
 from datetime import timedelta
 
-from flask import request, abort
+from flask import request, abort, send_file
 
 from slippi.slippi_characters import SlippiCharacterColors
 from slippi.slippi_ranks import rank_list
 
 from models import db, User, Elo, CharactersEntry
 
+matplotlib.use('agg')
 logger = logging.getLogger(f'andross.{__name__}')
 
 
@@ -62,6 +65,7 @@ def get_character_usage_pie():
     logger.debug('get_character_usage_pie')
 
     user_id = request.args.get('id')
+    as_image = request.args.get('as_image')
 
     if not user_id:
         abort(400, 'Missing required parameter (id)')
@@ -115,13 +119,14 @@ def get_character_usage_pie():
     pyplot.clf()
     pyplot.close(fig)
 
-    return filename
+    return filename if not as_image else send_file(filepath, mimetype='image/png')
 
 
 def get_basic_elo_graph():
     logger.debug('get_basic_elo_graph')
 
     user_id = request.args.get('id')
+    as_image = request.args.get('as_image')
 
     if not user_id:
         abort(400, 'Missing required parameter (id)')
@@ -174,4 +179,7 @@ def get_basic_elo_graph():
     pyplot.savefig(filepath)
     pyplot.clf()
     pyplot.close(fig)
-    return {'filename': filename, 'start_date': min(x_axis).date(), 'end_date': max(x_axis).date()}, 200
+    if not as_image:
+        return {'filename': filename, 'start_date': min(x_axis).date(), 'end_date': max(x_axis).date()}, 200
+    else:
+        return send_file(filepath, mimetype='image/png')
