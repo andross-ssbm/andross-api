@@ -9,9 +9,8 @@ app = Flask(__name__)
 
 app.config.from_object('config.Config')
 
-db.init_app(app)
-
 with app.app_context():
+    db.init_app(app)
     db.create_all()
     create_character_list()
 
@@ -25,4 +24,5 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    with app.app_context():
+        app.run(host='0.0.0.0')

@@ -23,26 +23,22 @@ def require_api_key(func):
     return decorated_function
 
 
-@require_api_key
-def create_user():
-    user_id = request.args.get('id')
-    cc = request.args.get('cc')
-    name = request.args.get('name')
+def create_user(user_id: int, cc: str, name: str):
 
     if not user_id or not cc or not name:
-        abort(400, 'Missing a required parameter (id, cc, name)')
+        return {'error_message': 'Missing a required parameter (id, cc, name).'}, 400
 
     if User.query.filter_by(id=user_id).first():
-        abort(400, 'User already exists')
+        return {'error_message': 'User already exists.'}, 400
 
     if User.query.filter_by(cc=cc).first():
-        abort(400, 'Connect code already in use')
+        return {'error_message': 'Connect code already in use.'}, 400
 
     if not SlippiRankedAPI.is_valid_connect_code(cc):
-        abort(400, f'Invalid connect code "{cc}"')
+        return {'error_message': f'Invalid connect code "{cc}".'}, 400
 
     if len(name) > 12:
-        abort(400, 'Name is too long, please provide a name shorter than 12')
+        return {'error_message': 'Name is too long, please provide a name shorter than 12.'}
 
     db.session.add(User(id=int(user_id), cc=cc, name=name))
     db.session.commit()
@@ -51,24 +47,30 @@ def create_user():
 
 
 @require_api_key
-def update_user():
-    user_id = request.args.get('id')
+def update_user(user_id: int):
     cc = request.args.get('cc')
     name = request.args.get('name')
 
-    if not user_id:
-        abort(400, 'Missing required parameter (id)')
+    if not cc and not name:
+        return {'error_message': 'Missing both cc and name, please provide at least one.'}, 400
 
-    user = db.get_or_404(User, user_id, description='User not found')
-    if cc:
+    user = db.session.query(User).filter(User.id == user_id).first()
+    if not user:
+        return create_user(user_id, cc, name)
+
+    if cc and cc != user.cc:
         if not SlippiRankedAPI.is_valid_connect_code(cc):
-            abort(400, 'Invalid connect code')
+            return {'error_message': 'Invalid connect code.'}
+
+        user_cc = db.session.query(User).filter_by(cc=cc).first()
+        if user_cc:
+            return {'error_message': f'Connect code is already used by {user_cc.name}'}, 400
         user.cc = cc
         db.session.commit()
 
-    if name:
+    if name and name != user.name:
         if len(name) > 12:
-            abort(400, 'Name is too long, please provide a name shorter than 12')
+            return {'error_message': 'Name is too long, please provide a name shorter than 12.'}
         user.name = name
         db.session.commit()
 
@@ -80,25 +82,13 @@ def get_users():
     return [user.to_dict() for user in users]
 
 
-def get_user():
-    user_id = request.args.get('id')
-    cc = request.args.get('cc')
-
-    if not user_id:
-        abort(400, 'Missing required parameter (id)')
-
-    user = User.query.filter(db.or_(User.id == user_id, User.cc == cc)).first()
-    if not user:
-        abort(404, f'Unable to find user for ({user_id}, {cc})')
-
+def get_users_by_id(user_id: int):
+    user = db.get_or_404(User, user_id, description='User not found')
     return user.to_dict()
 
 
-def get_users_by_id():
-    user_id = request.args.get('id')
-    if not user_id:
-        abort(400, 'Required parameter user_id not supplied')
-    user = db.get_or_404(User, int(user_id) if user_id else 0, description='User not found')
+def get_users_by_cc(user_cc: str):
+    user = db.one_or_404(db.select(User).filter_by(cc=user_cc.replace('-', '#')), description='User not found')
     return user.to_dict()
 
 
@@ -118,14 +108,6 @@ def create_elo():
     db.session.commit()
 
     return {'message': 'elo entry created successfully'}, 200
-
-
-def get_users_by_cc():
-    user_cc = request.args.get('cc')
-    if not user_cc:
-        abort(400, 'Required parameter user_cc not supplied')
-    user = db.one_or_404(db.select(User).filter_by(cc=user_cc), description='User not found')
-    return user.to_dict()
 
 
 def get_elo():
