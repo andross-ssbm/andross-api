@@ -185,6 +185,10 @@ def get_basic_elo_graph():
     pyplot.clf()
     pyplot.close(fig)
     if not as_image:
-        return {'filename': filename, 'start_date': min(x_axis).date(), 'end_date': max(x_axis).date()}, 200
+        return {
+            'filename': filename,
+            'start_date': min(x_axis).date().strftime('%m/%d/%Y'),
+            'end_date': max(x_axis).date().strftime('%m/%d/%Y')
+        }, 200
     else:
         return send_file(filepath, mimetype='image/png')
