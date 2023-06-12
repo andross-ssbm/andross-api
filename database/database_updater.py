@@ -1,15 +1,12 @@
 import logging
-from os import getenv
-from functools import wraps
 from datetime import datetime
 
-from flask import render_template, jsonify, request, abort
-from flask_sqlalchemy import SQLAlchemy
+from flask import request
 from slippi.slippi_api import SlippiRankedAPI
 from slippi.slippi_user import Characters
-from slippi.slippi_characters import get_character_id, get_character_name
+from slippi.slippi_characters import get_character_id
 
-from models import db, User, CharacterList, EntryDate, Elo, WinLoss, DRP, DGP, Leaderboard, CharactersEntry
+from models import db, User, EntryDate, Elo, WinLoss, DRP, DGP, Leaderboard, CharactersEntry
 from database.queries import require_api_key
 
 logger = logging.getLogger(f'andross.{__name__}')
@@ -121,16 +118,12 @@ def update_database():
             db.session.commit()
 
         # Create dgp entry if latest dgp entry for user doesn't match slippi data
-        if slippi_user.ranked_profile.daily_global_placement:
-            latest_dgp = DGP.query.filter(DGP.user_id == local_user.id).order_by(DGP.entry_time.desc()).first()
-
-            if latest_dgp:
-                if latest_dgp.placement != slippi_user.ranked_profile.daily_global_placement:
-                    dgp_entry = DGP(user_id=local_user.id,
-                                    placement=slippi_user.ranked_profile.daily_global_placement,
-                                    entry_time=entry_date.entry_time)
-                    db.session.add(dgp_entry)
-                    db.session.commit()
+        if local_user.latest_dgp != slippi_user.ranked_profile.daily_global_placement:
+            dgp_entry = DGP(user_id=local_user.id,
+                            placement=slippi_user.ranked_profile.daily_global_placement,
+                            entry_time=entry_date.entry_time)
+            db.session.add(dgp_entry)
+            db.session.commit()
 
         # Create character_entry for user
         if len(slippi_user.ranked_profile.characters):

@@ -287,4 +287,7 @@ LEFT JOIN character_list cl ON ce.character_id = cl.id;
 def user_profile(user_id: int):
     user = db.get_or_404(User, user_id, description='Unable to get user')
     characters = user.get_latest_characters_fast()
-    return render_template('user_profile.html', user=user, get_rank=get_rank, characters=characters)
+    return render_template('user_profile.html',
+                           user=user,
+                           user_rank=get_rank(user.latest_elo, user.latest_drp, user.latest_dgp),
+                           characters=characters)

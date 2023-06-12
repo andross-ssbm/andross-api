@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-import logging
 from typing import Optional
 
 from sqlalchemy import DDL, event
@@ -30,6 +29,7 @@ class User(db.Model):
                                              server_default='1100.0', default=0)
     latest_wins: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
     latest_losses: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
+    latest_dgp: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
     latest_drp: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
 
     main_character: db.Mapped['CharacterList'] = db.db.relationship('CharacterList', lazy='joined')
@@ -60,7 +60,8 @@ class User(db.Model):
             'latest_elo': self.latest_elo,
             'latest_wins': self.latest_wins,
             'latest_losses': self.latest_losses,
-            'latest_drp': self.latest_drp,
+            'latest_dgp': self.latest_dgp,
+            'latest_drp': self.latest_drp
         }
 
     def get_latest_characters(self) -> Optional['CharactersEntry']:
@@ -274,6 +275,21 @@ class DGP(db.Model):
         db.Index('idx_daily_global_placement_entry_time', entry_time)
     )
 
+    trigger = DDL("""
+                CREATE OR REPLACE FUNCTION update_latest_dgp()
+                RETURNS TRIGGER AS $$
+                BEGIN
+                  UPDATE users SET latest_dgp = NEW.placement WHERE users.id = NEW.user_id;
+                  RETURN NEW;
+                END;
+                $$ LANGUAGE plpgsql;
+
+                CREATE TRIGGER update_latest_dgp_trigger
+                AFTER INSERT OR UPDATE ON daily_global_placement
+                FOR EACH ROW
+                EXECUTE FUNCTION update_latest_dgp();
+            """)
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -293,6 +309,7 @@ class Leaderboard(db.Model):
     wins: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
     losses: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
     drp: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
+    dgp: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
     entry_time: db.Mapped[datetime] = db.Column(db.DateTime, db.ForeignKey('entry_date.entry_time'), nullable=False)
 
     __table_args__ = (
@@ -308,6 +325,7 @@ class Leaderboard(db.Model):
             'elo': self.elo,
             'wins': self.wins,
             'losses': self.losses,
+            'dgp': self.dgp,
             'drp': self.drp,
             'entry_time': self.entry_time.strftime("%Y-%m-%d %H:%M:%S.%f"),
         }
