@@ -9,7 +9,7 @@ from slippi.slippi_characters import get_character_id
 from models import db, User, EntryDate, Elo, WinLoss, DRP, DGP, Leaderboard, CharactersEntry
 from database.queries import require_api_key
 
-logger = logging.getLogger(f'andross.{__name__}')
+logger = logging.getLogger(f'andross-api')
 
 
 @require_api_key
@@ -71,26 +71,32 @@ def update_database():
     # Loop through all users and get their ranked data, when unable to get users abort
     users_list = User.query.all() if not user_id else User.query.filter(User.id == int(user_id)).all()
     if not users_list:
+        logger.critical('Unable to get users')
         return {'error_message': 'Unable to get users'}, 404
 
     ranked_data = [[user, slippi_api.get_player_ranked_data(user.cc)] for user in users_list]
     if not ranked_data:
+        logger.critical('Unable to get slippi data')
         return {'error_message': 'Unable to get slippi data'}, 404
 
     for entry in [[user, slippi_data] for user, slippi_data in ranked_data if slippi_data]:
         local_user = entry[0]
         slippi_user = entry[1]
+        logger.info(f'Attempting to update {local_user}')
 
         # Skip to next entry if user has no ranked id
         if not slippi_user.ranked_profile.id:
+            logger.info('Has no slippi profile')
             continue
 
         # Update the slippi_id if it doesn't match
+        logger.info('Update slippi id')
         if local_user.slippi_id != slippi_user.ranked_profile.id:
             local_user.slippi_id = slippi_user.ranked_profile.id
             db.session.commit()
 
         # Create elo entry if slippi data doesn't match user.latest_elo
+        logger.info('Update elo')
         if local_user.latest_elo != slippi_user.ranked_profile.rating_ordinal:
             elo_entry = Elo(user_id=local_user.id,
                             elo=slippi_user.ranked_profile.rating_ordinal,
@@ -99,6 +105,7 @@ def update_database():
             db.session.commit()
 
         # Create win-loss entry if slippi data doesn't match user.latest_win/losses
+        logger.info('Update win loss')
         if local_user.latest_wins != slippi_user.ranked_profile.wins or \
            local_user.latest_losses != slippi_user.ranked_profile.losses:
 
@@ -110,6 +117,7 @@ def update_database():
             db.session.commit()
 
         # Create drp entry if slippi data doesn't match user.latest_drp
+        logger.info('Update drp')
         if local_user.latest_drp != slippi_user.ranked_profile.daily_regional_placement:
             drp_entry = DRP(user_id=local_user.id,
                             placement=slippi_user.ranked_profile.daily_regional_placement,
@@ -118,6 +126,7 @@ def update_database():
             db.session.commit()
 
         # Create dgp entry if latest dgp entry for user doesn't match slippi data
+        logger.info('Update dgp')
         if local_user.latest_dgp != slippi_user.ranked_profile.daily_global_placement:
             dgp_entry = DGP(user_id=local_user.id,
                             placement=slippi_user.ranked_profile.daily_global_placement,
@@ -126,6 +135,7 @@ def update_database():
             db.session.commit()
 
         # Create character_entry for user
+        logger.info('Update characters')
         if len(slippi_user.ranked_profile.characters):
             write_character = True
             latest_character_entry = CharactersEntry.query\
@@ -157,10 +167,13 @@ def update_database():
                     db.session.add(character_entry)
                     db.session.commit()
 
+                logger.info('Update main')
                 main_id = get_character_id(
                     max(slippi_user.ranked_profile.characters, key=lambda c: c.game_count).character,
                     dk_claus=True)
                 local_user.main_id = main_id
                 db.session.commit()
+
+        logger.info(f'Updated {local_user}')
 
     return {'message': 'Updated database successfully'}, 201
