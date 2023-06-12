@@ -3,8 +3,8 @@
 {% block title %}User Profile{% endblock %}
 
 {% block content %}
-{% set rank = get_rank(user.latest_elo, user.latest_drp).replace(' ', '_') %}
-{% set rank_name = get_rank(user.latest_elo, user.latest_drp) %}
+{% set rank = user_rank.replace(' ', '_') %}
+{% set rank_name = user_rank %}
 {% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
 {% set cc = user.cc.upper() %}
 <div class="flex flex-wrap justify-center gap-10 pt-10 pb-10">
