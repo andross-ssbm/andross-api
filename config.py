@@ -12,3 +12,7 @@ class Config:
         'pool_recycle': 60,
         'pool_pre_ping': True
     }
+
+
+class ProdConfig(Config):
+    SQLALCHEMY_ECHO = False
