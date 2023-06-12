@@ -264,7 +264,8 @@ LEFT JOIN (
     ) ce_max ON ce.user_id = ce_max.user_id AND ce.entry_time = ce_max.max_entry_time
     LEFT JOIN character_list cl ON ce.character_id = cl.id
 ) ce ON u.id = ce.user_id
-LEFT JOIN character_list cl ON ce.character_id = cl.id;
+LEFT JOIN character_list cl ON ce.character_id = cl.id
+order by ce.game_count DESC, ce.user_id;
 '''
     users = User.query.order_by(User.latest_elo.desc()).all()
     results = db.session.execute(db.text(sql_query)).all()
