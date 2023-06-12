@@ -1,53 +1,62 @@
 {% extends "base.html" %}
 
-{% block title %}Leaderboard{% endblock %}
+{% block title %}Slippi Leaderboard{% endblock %}
 
 {% block content %}
-  <h1>Michigan Slippi Leaderboard</h1>
-  <table>
-    <thead>
+  <h1 class="text-4xl text-center font-medium my-10">Michigan Slippi Leaderboard</h1>
+  <div class="flex justify-center">
+  <table class="table-fixed bg-dark-theme-highlight my-10">
+    <thead class="text-center">
       <tr>
-        <th>Position</th>
-        <th>Rank</th>
-        <th>Tag</th>
-        <th>Elo</th>
-        <th>Characters</th>
-        <th>Win/Loss</th>
+        <th class="bg-slippi-green px-8 py-8">Position</th>
+        <th class="bg-slippi-green px-8">Rank</th>
+        <th class="bg-slippi-green px-8">Tag</th>
+        <th class="bg-slippi-green px-8">Rating</th>
+        <th class="bg-slippi-green px-8">Characters</th>
+        <th class="bg-slippi-green px-8 py-8">Win/Loss</th>
       </tr>
     </thead>
     <tbody>
       {% for user in users %}
         <tr>
-          <td>{{ loop.index }}</td>
+          <td class="border-b border-background-dark text-center text-4xl font-bold">{{ loop.index }}</td>
           {% set rank = get_rank(user.latest_elo, user.latest_drp).replace(' ', '_') %}
           {% set rank_name = get_rank(user.latest_elo, user.latest_drp) %}
-          {% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
-          <td class="rank_img_column">
-            <div>
-              <img class="rank_img" src="{{ url_for('static', filename='images/ranks/' + rank + '.svg') }}" alt="{{ rank_name }}">
+          {% set url = url_for('database_blueprint.user_profile', user_id=user.id) %}
+          <td class="border-b border-background-dark px-4 py-4">
+            <div class="flex flex-wrap">
+              <img class="basis-full h-20" src="{{ url_for('static', filename='images/ranks/' + rank + '.svg') }}" alt="{{ rank_name }}">
             </div>
-            <div>{{ rank_name }}</div>
+            <div class="basis-full text-center text-xl font-medium">{{ rank_name }}</div>
           </td>
-          <td><a href="{{ url }}"> {{ user.name }} </a>
-            <div>{{ user.cc }}</div>
+          <td  class="border-b border-background-dark px-4 py-4">
+            <a class="basis-full text-center align-middle text-2xl font-medium w-full hover:text-slippi-green" style="display: block;" href="{{ url }}"> {{ user.name }} </a>
+            <p class="basis-full text-center align-middle text-slate text-xl font-regular">{{ user.cc }}</p>
           </td>
-          <td>{{ "{:.2f}".format(user.latest_elo) }}</td>
-          <td class="character-image-column">
+          <td class="border-b border-background-dark text-center align-middle text-2xl font-medium">{{ "{:.0f}".format(user.latest_elo) }}</td>
+          <td class="border-b border-background-dark w-96">
+            <div class="flex flex-wrap justify-center gap-4 w-auto mx-4 my-4">
             {% set total_games = characters[user.id] | sum(attribute='game_count') %}
             {% for character in characters[user.id] %}
               {% if character %}
-              <span>
-                <img class="character-image" src="{{ url_for('static', filename='images/characters/' + character.name + '.png') }}"
+              <div class="basis-1/5">
+                <img class="w-12" src="{{ url_for('static', filename='images/characters/' + character.name + '.png') }}"
                    title="Game count: {{ character.game_count }}&#013;Percentage: {{ '%.2f'|format((character.game_count/total_games)*100) }}%">
-              </span>
+              </div>
               {% endif %}
             {% endfor %}
+            </div>
           </td>
-          <td class="divider_text">
-            <span class="win_text">{{ user.latest_wins }}</span> / <span class="loss_text">{{ user.latest_losses }}</span>
+          <td class="border-b border-background-dark">
+            <div class="flex flex-nowarp justify-center whitespace-pre">
+              <p class="text-center align-middle text-win-green text-xl font-bold">{{ user.latest_wins }}</p>
+              <p class="text-center align-middle text-slate text-xl font-thin"> / </p>
+              <p class="text-center align-middle text-loss-red text-xl font-bold">{{ user.latest_losses }}</p>
+            </div>
           </td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
 {% endblock %}

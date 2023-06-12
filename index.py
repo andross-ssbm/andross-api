@@ -20,7 +20,15 @@ app.register_blueprint(graphs_blueprint)
 
 @app.route("/")
 def hello_world():
-    return 'hello world'
+    return render_template('index.html')
+
+
+@app.teardown_request
+def teardown_request(exception=None):
+    db.session.remove()
+    if exception and db.session.is_active:
+        print(exception)
+        db.session.rollback()
 
 
 if __name__ == '__main__':

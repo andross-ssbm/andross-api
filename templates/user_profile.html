@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+{% set rank = get_rank(user.latest_elo, user.latest_drp).replace(' ', '_') %}
+{% set rank_name = get_rank(user.latest_elo, user.latest_drp) %}
+{% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
+{% set cc = user.cc.upper() %}
+<div class="flex flex-wrap justify-center gap-10 pt-10 pb-10">
+    <div class="container mx-auto flex flex-wrap justify-center items-center gap-4">
+        <a href="{{ url }}" class="basis-full text-center text-5xl font-medium hover:text-slippi-green">{{ user.name }}</a>
+        <p class="basis-full text-center text-xl font-medium text-slate">{{ cc }}</p>
+        <div class="flex justify-center">
+            <img class="rank-image" src="{{ url_for('static', filename='images/ranks/' + rank + '.svg') }}" style="height: 100px; align: center;" alt="{{ rank_name }}">
+        </div>
+        <p class="basis-full text-center text-4xl font-medium">{{ rank_name }}</p>
+    </div>
+    <div class="flex flex-wrap justify-center items-center">
+        <p class="basis-full text-center text-xs text-slate">Rating</p>
+        <p class="basis-full text-center text-xl font-medium">{{ "{:.2f}".format(user.latest_elo) }}</p>
+    </div>
+    <div class="flex flex-wrap justify-center items-center">
+        <p class="basis-full  text-center text-xs text-slate">Win Loss</p>
+        <p class="basis-1/5  text-center text-xl text-win-green font-medium">{{ user.latest_wins }}</p>
+        <p class="basis-1/5  text-center text-xl text-slate font-medium">/</p>
+        <p class="basis-1/5  text-center text-xl text-loss-red font-medium">{{ user.latest_losses }}</p>
+    </div>
+    <div class="flex flex-wrap justify-center items-center">
+        <p class="basis-full  text-center text-xs text-slate">Sets played</p>
+        <p class="basis-full  text-center text-xl font-medium">{{ user.latest_wins + user.latest_losses }}</p>
+    </div>
+</div>
+<div class="flex flex-wrap justify-evenly items-center gap-10 pt-5 pb-10 mb-10 bg-dark-theme-highlight rounded-lg">
+    <div class="basis-full ml-10 mt-5 text-4xl font-medium">Characters</div>
+    {% set total_games = characters | sum(attribute='game_count') %}
+    {% for character in characters %}
+    <div class="flex flex-wrap items-center">
+        <img class="basis-1/4 w-25" src="{{ url_for('static', filename='images/characters/' + character['name'] + '.png') }}">
+        <p class="basis-1/4"></p>
+        <p class="basis-1/4 text-left text-xl font-medium">{{ character['name'].title().replace('_', ' ') }}</p>
+        <p class="basis-1/2 text-left text-slate text-xs font-medium">Game count: </p>
+        <p class="basis-1/4 text-left text-white text-sm font-medium">{{ character['game_count'] }}</p>
+        <p class="basis-1/2 text-left text-slate text-xs font-medium">Percentage used: </p>
+        <p class="basis-1/4 text-left text-white text-sm font-medium">{{ '%.2f'|format((character.game_count/total_games)*100) }}%</p>
+    </div>
+    {% endfor %}
+</div>
+<div id="graphs-flex" class="flex flex-wrap justify-center items-center gap-10 pt-5 pb-10 mt-10 h-300 bg-dark-theme-highlight rounded-lg hidden">
+    <div class="basis-full ml-10 mt-5 text-4xl font-medium">Graphs</div>
+    <div class="container basis-5/12 m-8">
+        <img id="elo-graph-image" class="h-full" src="" alt="">
+    </div>
+    <div class="container basis-5/12 m-8">
+        <img id="character-pie-image" class="h-full" src="" alt="">
+    </div>
+</div>
+
+
+
+
+<script>
+function getBasicEloGraph() {
+  const userId = '{{ user.id }}'; // Replace with the actual user ID
+  const asImage = true;
+
+  const url = `{{ url_for("graphs_blueprint.get_basic_elo_graph") }}?id=${userId}&as_image=${asImage}`;
+
+  return fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Error: ' + response.status);
+      }
+      return response.blob();
+    })
+    .then(data => {
+      displayImage(data, 'elo-graph-image');
+    })
+    .catch(error => {
+      console.error('An error occurred:', error);
+    });
+}
+
+function getCharacterPieGraph() {
+  const userId = '{{ user.id }}'; // Replace with the actual user ID
+  const asImage = true;
+
+  const url = `{{ url_for("graphs_blueprint.get_character_usage_pie") }}?id=${userId}&as_image=${asImage}`;
+
+  return fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Error: ' + response.status);
+      }
+      return response.blob();
+    })
+    .then(data => {
+      displayImage(data, 'character-pie-image');
+    })
+    .catch(error => {
+      console.error('An error occurred:', error);
+    });
+}
+
+function displayImage(imageBlob, elementID) {
+  // Handle and display the image blob on the page
+  const imgElement = document.getElementById(elementID);
+  imgElement.src = URL.createObjectURL(imageBlob);
+}
+
+// Call the first function and wait for it to finish before calling the second function
+getBasicEloGraph()
+  .then(() => {
+    // First function completed, now call the second function
+    return getCharacterPieGraph();
+  })
+  .then(() => {
+    console.log('Both requests completed successfully.');
+    const element = document.getElementById('graphs-flex');
+    element.classList.remove('hidden');
+  })
+  .catch(error => {
+    console.error('An error occurred during the requests:', error);
+  });
+
+</script>
+
+{% endblock %}

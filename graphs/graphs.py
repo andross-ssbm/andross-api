@@ -12,7 +12,7 @@ from slippi.slippi_ranks import rank_list
 
 from models import db, User, Elo, CharactersEntry
 
-matplotlib.use('agg')
+matplotlib.use('Agg')
 logger = logging.getLogger(f'andross.{__name__}')
 
 
@@ -142,6 +142,11 @@ def get_basic_elo_graph():
 
     if not x_axis or not y_axis:
         return
+
+    if len(x_axis) == 1:
+        single_point = x_axis[0]
+        x_axis.append(single_point - timedelta(days=1) - timedelta(weeks=1))  # Offset the new data point by 1 minute
+        y_axis.append(y_axis[0])  # Duplicate the single data point
 
     pyplot.style.use(discord_dark_style)
     fig, ax = pyplot.subplots(figsize=(15, 10))
