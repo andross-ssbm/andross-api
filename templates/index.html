@@ -1,9 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}User Profile{% endblock %}
+{% block title %}Andross{% endblock %}
 
 {% block content %}
-<script src="https://cdn.tailwindcss.com"></script>
+<div class="grid justify-center justify-items-center pt-16">
+    <p class="text-6xl font-bold">A slippi ranked scraper and aggregator.</p>
+    <p class="text-2xl text-slate font-regular pt-10">Designed and created by Soph.</p>
+    <div class="flex flex-wrap justify-center gap-4 pt-20">
+        <a class="group block basis-1/5 bg-dark-theme-highlight rounded-lg hover:bg-slippi-green" href="https://github.com/andross-ssbm/andross-api">
+            <div class="flex flex-wrap m-6">
+                <p class="basis-full text-slate pb-4 group-hover:text-dark-theme-highlight">andross-api</p>
+                <p class="basis-full text-white group-hover:text-dark-theme-highlight">Webserver and api for displaying scrapped slippi.gg ranked data.</p>
+            </div>
+        </a>
+        <a href="https://github.com/andross-ssbm/Andross" class="group block basis-1/5 bg-dark-theme-highlight rounded-lg hover:bg-slippi-green">
+            <div class="flex flex-wrap m-6">
+                <p class="basis-full text-slate pb-4 group-hover:text-dark-theme-highlight">Andross</p>
+                <p class="basis-full text-white group-hover:text-dark-theme-highlight">Discord bot for serving andross-api and user input.</p>
+            </div>
+        </a>
+        <a class="group block basis-1/5 bg-dark-theme-highlight rounded-lg hover:bg-slippi-green" href="https://github.com/andross-ssbm/slippy-api">
+            <div class="flex flex-wrap m-6">
+                <p class="basis-full text-slate pb-4 group-hover:text-dark-theme-highlight">slippy-api</p>
+                <p class="basis-full text-white group-hover:text-dark-theme-highlight">Simple wrapper for slippi.gg GraphQL api.</p>
+            </div>
+        </a>
+    </div>
+</div>
 
-<h1 class="text-blue-600">Hello, Flask!</h1>
 {% endblock %}
