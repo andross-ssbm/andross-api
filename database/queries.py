@@ -22,7 +22,7 @@ def require_api_key(func):
             abort(401)
     return decorated_function
 
-
+@require_api_key
 def create_user(user_id: int, cc: str, name: str):
 
     if not user_id or not cc or not name:
