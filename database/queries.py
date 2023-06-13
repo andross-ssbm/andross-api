@@ -16,7 +16,7 @@ def require_api_key(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         api_key = request.headers.get('X-API-Key')
-        if api_key and api_key == getenv('API-KEY'):
+        if api_key and api_key == getenv('API_KEY'):
             return func(*args, **kwargs)
         else:
             abort(401)
