@@ -290,5 +290,5 @@ def user_profile(user_id: int):
     characters = user.get_latest_characters_fast()
     return render_template('user_profile.html',
                            user=user,
-                           user_rank=get_rank(user.latest_elo, user.latest_drp, user.latest_dgp),
+                           user_rank=get_rank(user.latest_elo, user.latest_dgp),
                            characters=characters)
