@@ -47,6 +47,7 @@ def update_leaderboard():
                                           wins=slippi_data.ranked_profile.wins,
                                           losses=slippi_data.ranked_profile.losses,
                                           drp=slippi_data.ranked_profile.daily_regional_placement,
+                                          dgp=slippi_data.ranked_profile.daily_global_placement,
                                           entry_time=current_time)
             db.session.add(leadboard_entry)
             db.session.commit()
