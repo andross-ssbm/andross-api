@@ -42,17 +42,17 @@
     </div>
     <div class="flex flex-wrap justify-center items-center">
         <p class="basis-full text-center text-xs text-slate">Rating</p>
-        <p class="basis-full text-center text-xl font-medium">{{ "{:.2f}".format(user.latest_elo) }}</p>
+        <p id="rating" class="basis-full text-center text-xl font-medium">{{ "{:.2f}".format(user.latest_elo) }}</p>
     </div>
     <div class="flex flex-wrap justify-center items-center">
         <p class="basis-full  text-center text-xs text-slate">Win Loss</p>
         <p id="wins-text" class="basis-1/5  text-center text-xl text-win-green font-medium">{{ user.latest_wins }}</p>
         <p class="basis-1/5  text-center text-xl text-slate font-medium">/</p>
-        <p class="basis-1/5  text-center text-xl text-loss-red font-medium">{{ user.latest_losses }}</p>
+        <p id="losses-text" class="basis-1/5  text-center text-xl text-loss-red font-medium">{{ user.latest_losses }}</p>
     </div>
     <div class="flex flex-wrap justify-center items-center">
         <p class="basis-full  text-center text-xs text-slate">Sets played</p>
-        <p class="basis-full  text-center text-xl font-medium">{{ user.latest_wins + user.latest_losses }}</p>
+        <p id="set-count" class="basis-full  text-center text-xl font-medium">{{ user.latest_wins + user.latest_losses }}</p>
     </div>
 </div>
 <div class="flex flex-wrap justify-evenly items-center gap-10 pt-5 pb-10 mb-10 bg-dark-theme-highlight rounded-lg">
@@ -149,7 +149,10 @@ getBasicEloGraph()
 
 cc = document.getElementById('cc').textContent
 fetchAccountData(cc, cc).then(user => {
-    document.getElementById('wins-text').textContent = user.rankedNetplayProfile.wins + 1
+    document.getElementById('rating').textContent = user.rankedNetplayProfile.ratingOrdinal.toFixed(2);
+    document.getElementById('wins-text').textContent = user.rankedNetplayProfile.wins;
+    document.getElementById('losses-text').textContent = user.rankedNetplayProfile.losses;
+    document.getElementById('set-count').textContent = user.rankedNetplayProfile.wins + user.rankedNetplayProfile.losses;
 });
 
 </script>
