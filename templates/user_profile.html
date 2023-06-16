@@ -7,6 +7,21 @@
 {% set rank_name = user_rank %}
 {% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
 {% set cc = user.cc.upper() %}
+{% if (user.latest_dgp or user.latest_drp) %}
+<div class="grid grid-cols-1 justify-end">
+    {% if user.latest_dgp %}
+    <div class="bg-dark-theme-highlight">
+        <p>Global: {{ user.latest_dgp }}</p>
+    </div>
+    {% endif %}
+    {% if user.latest_drp %}
+    <div>
+        <p>Regional: {{ user.latest_drp }}</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endif %}
 <div class="flex flex-wrap justify-center gap-10 pt-10 pb-10">
     <div class="container mx-auto flex flex-wrap justify-center items-center gap-4">
         <a href="{{ url }}" class="basis-full text-center text-5xl font-medium hover:text-slippi-green">{{ user.name }}</a>
