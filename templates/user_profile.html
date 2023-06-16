@@ -12,7 +12,8 @@
     {% if user.latest_dgp %}
     <div class="flex basis-full">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
-            <p class="text-slate text-right text-sm font-medium">Global: {{ user.latest_dgp }}</p>
+            <p class="text-slate text-right text-sm font-medium pl-2 pt-2 pb-2 inline">Global: </p>
+            <p class="text-white text-right text-md font-medium inline pr-2 pt-2 pb-2">{{ user.latest_dgp }}</p>
         </div>
     </div>
     {% endif %}
