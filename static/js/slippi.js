@@ -1,4 +1,4 @@
-function fetchAccountData(cc, uid) {
+async function fetchAccountData(cc, uid) {
   // GraphQL query
   const query = `
     query AccountManagementPageQuery($cc: String!, $uid: String!) {
@@ -50,7 +50,7 @@ function fetchAccountData(cc, uid) {
   };
 
   // Make the GraphQL request
-  fetch('https://gql-gateway-dot-slippi.uc.r.appspot.com/graphql', {
+  const response = await fetch('https://gql-gateway-dot-slippi.uc.r.appspot.com/graphql', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -59,15 +59,9 @@ function fetchAccountData(cc, uid) {
       query,
       variables,
     }),
-  })
-    .then(response => response.json())
-    .then(data => {
-      // Extract the relevant values from the response
-      const user = data.data.getConnectCode.user;
+  });
 
-      return user
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
+  const data = await response.json();
+  const user = data.data.getConnectCode.user;
+  return user;
 }
