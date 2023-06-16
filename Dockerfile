@@ -22,6 +22,10 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/Andross
 ENV FLASK_APP=index.py
 
+# Create cron job to run update.py, every 20 minutes and then every once a day at midnight, then run cron
+RUN crontab crontab
+RUN touch /var/log/cron.log
+
 RUN mv entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
