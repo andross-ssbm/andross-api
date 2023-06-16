@@ -23,12 +23,12 @@ api_key = os.getenv('API_KEY')
 
 if args.leaderboard:
     logger.info('Updating leaderboard')
-    response = requests.post(f'localhost:5000/rest/update_leaderboard/',
+    response = requests.post(f'http://localhost:5000/rest/update_leaderboard/',
                              headers={"X-API-KEY": api_key, 'Content-Type': 'application/json'})
     logger.info(f'Leaderboard {"Updated." if response.status_code == 201 else "not updated."} {response.status_code}')
 
 if args.database:
     logger.info('Updating database')
-    response = requests.post(f'localhost:5000/rest/update/',
+    response = requests.post(f'http://localhost:5000/rest/update/',
                              headers={"X-API-KEY": api_key, 'Content-Type': 'application/json'})
     logger.info(f'Database {"Updated." if response.status_code == 201 else "not updated."}  {response.status_code}')
