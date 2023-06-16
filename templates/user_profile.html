@@ -10,16 +10,19 @@
 {% if (user.latest_dgp or user.latest_drp) %}
 <div class="flex flex-col">
     {% if user.latest_dgp %}
-    <div class="flex basis-full">
+    <div class="flex justify-end basis-full">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
-            <p class="text-slate text-right text-sm font-medium pl-2 pt-2 pb-2 inline">Global: </p>
-            <p class="text-white text-right text-md font-medium inline pr-2 pt-2 pb-2">{{ user.latest_dgp }}</p>
+            <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Global: </p>
+            <p class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_dgp }}</p>
         </div>
     </div>
     {% endif %}
     {% if user.latest_drp %}
-    <div>
-        <p>Regional: {{ user.latest_drp }}</p>
+    <div class="flex justify-end basis-full">
+        <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
+            <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Regional: </p>
+            <p class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_drp }}</p>
+        </div>
     </div>
     {% endif %}
 
