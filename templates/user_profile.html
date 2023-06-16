@@ -8,10 +8,12 @@
 {% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
 {% set cc = user.cc.upper() %}
 {% if (user.latest_dgp or user.latest_drp) %}
-<div class="grid grid-cols-1 justify-end">
+<div class="flex flex-col">
     {% if user.latest_dgp %}
-    <div class="bg-dark-theme-highlight">
-        <p>Global: {{ user.latest_dgp }}</p>
+    <div class="flex basis-full">
+        <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
+            <p class="text-slate text-right text-sm font-medium">Global: {{ user.latest_dgp }}</p>
+        </div>
     </div>
     {% endif %}
     {% if user.latest_drp %}
