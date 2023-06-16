@@ -34,7 +34,7 @@
         <div class="flex basis-full justify-center">
             <a href="{{ url }}" class="center text-center text-5xl font-medium hover:text-slippi-green">{{ user.name }}</a>
         </div>
-        <p class="basis-full text-center text-xl font-medium text-slate">{{ cc }}</p>
+        <p id="cc" class="basis-full text-center text-xl font-medium text-slate">{{ cc }}</p>
         <div class="flex justify-center">
             <img class="rank-image" src="{{ url_for('static', filename='images/ranks/' + rank + '.svg') }}" style="height: 100px; align: center;" alt="{{ rank_name }}">
         </div>
@@ -46,7 +46,7 @@
     </div>
     <div class="flex flex-wrap justify-center items-center">
         <p class="basis-full  text-center text-xs text-slate">Win Loss</p>
-        <p class="basis-1/5  text-center text-xl text-win-green font-medium">{{ user.latest_wins }}</p>
+        <p id="wins-text" class="basis-1/5  text-center text-xl text-win-green font-medium">{{ user.latest_wins }}</p>
         <p class="basis-1/5  text-center text-xl text-slate font-medium">/</p>
         <p class="basis-1/5  text-center text-xl text-loss-red font-medium">{{ user.latest_losses }}</p>
     </div>
@@ -146,6 +146,11 @@ getBasicEloGraph()
   .catch(error => {
     console.error('An error occurred during the requests:', error);
   });
+
+cc = document.getElementById('cc').textContent
+fetchAccountData(cc, cc).then(user => {
+    document.getElementById('wins-text').textContent = user.rankedNetplayProfile.wins + 1
+});
 
 </script>
 
