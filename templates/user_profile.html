@@ -9,25 +9,25 @@
 {% set cc = user.cc.upper() %}
 <script src="{{ url_for('static', filename='js/slippi.js') }}"></script>
 <div id="user_id" class="hidden">{{ user.id }}</div>
-<div class="flex flex-col my-2">
-    <div class="flex justify-end basis-full">
+<div class="flex flex-col my-2 absolute right-0">
+    <div class="flex justify-end basis-full relative right-0">
         <button class="group bg-dark-theme-highlight rounded-lg m-2 hover:bg-slippi-green" onclick="refreshClick()">
-            <span class="text-slate font-medium p-3 group-hover:text-white">Refresh</span>
+            <span class="text-slippi-green font-medium p-3 group-hover:text-white">Refresh</span>
         </button>
     </div>
-    <div id="dgp-container" class="flex justify-end basis-full {{ '' if user.latest_dgp else 'hidden' }}">
+    <div id="dgp-container" class="flex justify-end basis-full relative right-0 {{ '' if user.latest_dgp else 'hidden' }}">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
             <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Global: </p>
             <p id="dgp" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_dgp }}</p>
         </div>
     </div>
-    <div id="drp-container" class="flex justify-end basis-full  {{ '' if user.latest_drp else 'hidden' }}">
+    <div id="drp-container" class="flex justify-end basis-full relative right-0 {{ '' if user.latest_drp else 'hidden' }}">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
             <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Regional: </p>
             <p id="drp" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_drp }}</p>
         </div>
     </div>
-    <div id="local-container" class="flex justify-end basis-full">
+    <div id="local-container" class="flex justify-end basis-full relative right-0">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
             <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Michigan: </p>
             <p id="position" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.get_position() }}</p>
