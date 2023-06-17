@@ -110,6 +110,14 @@ ORDER BY ce.game_count DESC'''
 
         return character_return_list
 
+    def get_position(self):
+        sql_query = '''
+            select count(*)+1 from users
+            where latest_elo > :user_elo
+            '''
+        results = db.session.execute(db.text(sql_query), {'user_elo': self.latest_elo}).one()
+        return results[0] if results else 0
+
 
 class CharacterList(db.Model):
     __tablename__ = 'character_list'
