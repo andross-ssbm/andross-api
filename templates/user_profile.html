@@ -26,6 +26,12 @@
             <p id="drp" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_drp }}</p>
         </div>
     </div>
+    <div id="local-container" class="flex justify-end basis-full">
+        <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
+            <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Michigan: </p>
+            <p id="position" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.get_position() }}</p>
+        </div>
+    </div>
 
 </div>
     {% if (user.latest_dgp or user.latest_drp) %}
