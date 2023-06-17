@@ -194,7 +194,7 @@ function refreshClick() {
         let usage = (character.gameCount/totalGameCount)*100;
         document.getElementById(character.character + '-usage').textContent = usage.toFixed(2) + '%';
     }
-    fetch('/rest/user/' + document.getElementById('user_id').textContent + '/position')
+    fetch('/rest/user/' + document.getElementById('user_id').textContent + '/position?elo=' + user.rankedNetplayProfile.ratingOrdinal)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
