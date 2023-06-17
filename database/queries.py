@@ -242,10 +242,9 @@ def get_leaderboard_position(user_id: int):
         return {'position': 0}, 200
 
     new_elo = request.args.get('elo')
-    if new_elo:
-        user.latest_elo = float(new_elo)
+    position = user.get_position(new_elo if new_elo else None)
 
-    return {'position': user.get_position() if user else 0}, 200
+    return {'position': position}, 200
 
 
 
