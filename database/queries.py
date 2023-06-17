@@ -236,15 +236,8 @@ def get_latest_leaderboard_entry():
 
 
 def get_leaderboard_position(user_id: int):
-    sql_query = '''
-    select count(*)+1 from users
-    where latest_elo > :user_elo
-    '''
-    user = User.query.filter(User.id == user_id).one()
-    if not user:
-        return {'position', None}, 200
-    results = db.session.execute(db.text(sql_query), {'user_elo': user.latest_elo}).one()
-    return {'position': results[0]}, 200
+    user = User.query.filter(User.id == user_id).first()
+    return {'position': user.get_position() if user else 0}, 200
 
 
 
