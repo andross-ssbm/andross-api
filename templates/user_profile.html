@@ -174,7 +174,9 @@ function refreshClick() {
 
     let rank_name = getRank(user.rankedNetplayProfile.ratingOrdinal, user.rankedNetplayProfile.daily_global_placement);
     document.getElementById('rank-name').textContent = rank_name;
-    document.getElementById('rank-image').src = '/static/images/ranks/' + rank_name.replace(/ /g, '_') + '.svg';
+    let rankImage = document.getElementById('rank-image');
+    rankImage.src = '/static/images/ranks/' + rank_name.replace(/ /g, '_') + '.svg';
+    rankImage.alt = rank_name
 
     for (const character of characters) {
         document.getElementById(character.character + '-game-count').textContent = character.gameCount;
