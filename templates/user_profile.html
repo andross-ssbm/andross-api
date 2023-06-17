@@ -8,6 +8,7 @@
 {% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
 {% set cc = user.cc.upper() %}
 <script src="{{ url_for('static', filename='js/slippi.js') }}"></script>
+<button onclick="refreshClick()">Refresh</button>
 <div class="flex flex-col my-2">
     {% if user.latest_dgp %}
     <div class="flex justify-end basis-full">
@@ -150,8 +151,9 @@ getBasicEloGraph()
     console.error('An error occurred during the requests:', error);
   });
 
-cc = document.getElementById('cc').textContent
-fetchAccountData(cc, cc).then(user => {
+function refreshClick() {
+    cc = document.getElementById('cc').textContent
+   fetchAccountData(cc, cc).then(user => {
 
     const characters = user.rankedNetplayProfile.characters;
     let totalGameCount = 0;
@@ -171,6 +173,9 @@ fetchAccountData(cc, cc).then(user => {
         document.getElementById(character.character + '-usage').textContent = usage.toFixed(2) + '%';
     }
 });
+}
+
+refreshClick()
 
 </script>
 
