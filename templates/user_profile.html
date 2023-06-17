@@ -14,7 +14,7 @@
     <div class="flex justify-end basis-full">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
             <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Global: </p>
-            <p class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_dgp }}</p>
+            <p id="dgp" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_dgp }}</p>
         </div>
     </div>
     {% endif %}
@@ -22,7 +22,7 @@
     <div class="flex justify-end basis-full">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
             <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Regional: </p>
-            <p class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_drp }}</p>
+            <p id="drp" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_drp }}</p>
         </div>
     </div>
     {% endif %}
@@ -40,9 +40,9 @@
         </div>
         <p id="cc" class="basis-full text-center text-xl font-medium text-slate">{{ cc }}</p>
         <div class="flex justify-center">
-            <img class="rank-image" src="{{ url_for('static', filename='images/ranks/' + rank + '.svg') }}" style="height: 100px; align: center;" alt="{{ rank_name }}">
+            <img id="rank-image" src="{{ url_for('static', filename='images/ranks/' + rank + '.svg') }}" style="height: 100px; align: center;" alt="{{ rank_name }}">
         </div>
-        <p class="basis-full text-center text-4xl font-medium">{{ rank_name }}</p>
+        <p id="rank-name" class="basis-full text-center text-4xl font-medium">{{ rank_name }}</p>
     </div>
     <div class="flex flex-wrap justify-center items-center">
         <p class="basis-full text-center text-xs text-slate">Rating</p>
@@ -166,6 +166,15 @@ function refreshClick() {
     document.getElementById('wins-text').textContent = user.rankedNetplayProfile.wins;
     document.getElementById('losses-text').textContent = user.rankedNetplayProfile.losses;
     document.getElementById('set-count').textContent = user.rankedNetplayProfile.wins + user.rankedNetplayProfile.losses;
+
+    if (user.rankedNetplayProfile.daily_global_placement)
+        document.getElementById('dgp').textContent = user.rankedNetplayProfile.daily_global_placement;
+    if (user.rankedNetplayProfile.daily_regional_placement)
+        document.getElementById('drp').textContent = user.rankedNetplayProfile.daily_regional_placement;
+
+    let rank_name = getRank(user.rankedNetplayProfile.ratingOrdinal, user.rankedNetplayProfile.daily_global_placement);
+    document.getElementById('rank-name').textContent = rank_name;
+    document.getElementById('rank-image').src = '/static/images/ranks/' + rank_name.replace(/ /g, '_') + '.svg';
 
     for (const character of characters) {
         document.getElementById(character.character + '-game-count').textContent = character.gameCount;
