@@ -106,7 +106,7 @@ const rank_list = [
 function getRank(elo, dailyGlobalPlacement) {
   console.log(`getRank: ${elo}, ${dailyGlobalPlacement}`);
 
-  if (dailyGlobalPlacement !== undefined) {
+  if (dailyGlobalPlacement !== null) {
     return grand_master.rank_name;
   }
 
