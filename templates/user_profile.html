@@ -59,14 +59,14 @@
     <div class="basis-full ml-10 mt-5 text-4xl font-medium">Characters</div>
     {% set total_games = characters | sum(attribute='game_count') %}
     {% for character in characters %}
-    <div class="flex flex-wrap items-center">
-        <img class="basis-1/4 w-25" src="{{ url_for('static', filename='images/characters/' + character['name'] + '.png') }}">
+    <div id="{{ character['name'] }}" class="flex flex-wrap items-center">
+        <img id="{{ character ['name'] }}-image" class="basis-1/4 w-25" src="{{ url_for('static', filename='images/characters/' + character['name'] + '.png') }}">
         <p class="basis-1/4"></p>
-        <p class="basis-1/4 text-left text-xl font-medium">{{ character['name'].title().replace('_', ' ') }}</p>
+        <p id="{{ character['name'] }}-name" class="basis-1/4 text-left text-xl font-medium">{{ character['name'].title().replace('_', ' ') }}</p>
         <p class="basis-1/2 text-left text-slate text-xs font-medium">Game count: </p>
-        <p class="basis-1/4 text-left text-white text-sm font-medium">{{ character['game_count'] }}</p>
+        <p id="{{ character['name'] }}-game-count" class="basis-1/4 text-left text-white text-sm font-medium">{{ character['game_count'] }}</p>
         <p class="basis-1/2 text-left text-slate text-xs font-medium">Percentage used: </p>
-        <p class="basis-1/4 text-left text-white text-sm font-medium">{{ '%.2f'|format((character.game_count/total_games)*100) }}%</p>
+        <p id="{{ character['name'] }}-usage" class="basis-1/4 text-left text-white text-sm font-medium">{{ '%.2f'|format((character.game_count/total_games)*100) }}%</p>
     </div>
     {% endfor %}
 </div>
