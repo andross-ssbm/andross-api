@@ -165,10 +165,10 @@ function refreshClick() {
     document.getElementById('losses-text').textContent = user.rankedNetplayProfile.losses;
     document.getElementById('set-count').textContent = user.rankedNetplayProfile.wins + user.rankedNetplayProfile.losses;
 
-    if (user.rankedNetplayProfile.dailyGlobalPlacement)
+    if (user.rankedNetplayProfile.dailyGlobalPlacement !== null)
         document.getElementById('dgp').textContent = user.rankedNetplayProfile.dailyGlobalPlacement;
         document.getElementById('dgp-container').classList.remove('hidden');
-    if (user.rankedNetplayProfile.dailyRegionalPlacement)
+    if (user.rankedNetplayProfile.dailyRegionalPlacement !== null)
         document.getElementById('drp').textContent = user.rankedNetplayProfile.dailyRegionalPlacement;
         document.getElementById('drp-container').classList.remove('hidden');
 
