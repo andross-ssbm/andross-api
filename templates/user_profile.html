@@ -173,12 +173,14 @@ function refreshClick() {
     document.getElementById('losses-text').textContent = user.rankedNetplayProfile.losses;
     document.getElementById('set-count').textContent = user.rankedNetplayProfile.wins + user.rankedNetplayProfile.losses;
 
-    if (user.rankedNetplayProfile.dailyGlobalPlacement !== null)
+    if (user.rankedNetplayProfile.dailyGlobalPlacement !== null) {
         document.getElementById('dgp').textContent = user.rankedNetplayProfile.dailyGlobalPlacement;
         document.getElementById('dgp-container').classList.remove('hidden');
-    if (user.rankedNetplayProfile.dailyRegionalPlacement !== null)
+    }
+    if (user.rankedNetplayProfile.dailyRegionalPlacement !== null) {
         document.getElementById('drp').textContent = user.rankedNetplayProfile.dailyRegionalPlacement;
         document.getElementById('drp-container').classList.remove('hidden');
+    }
 
     let rank_name = getRank(user.rankedNetplayProfile.ratingOrdinal, user.rankedNetplayProfile.dailyGlobalPlacement);
     document.getElementById('rank-name').textContent = rank_name;
