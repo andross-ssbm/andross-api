@@ -8,7 +8,6 @@
 {% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
 {% set cc = user.cc.upper() %}
 <script src="{{ url_for('static', filename='js/slippi.js') }}"></script>
-{% if (user.latest_dgp or user.latest_drp) %}
 <div class="flex flex-col my-2">
     {% if user.latest_dgp %}
     <div class="flex justify-end basis-full">
@@ -28,8 +27,12 @@
     {% endif %}
 
 </div>
-{% endif %}
+    {% if (user.latest_dgp or user.latest_drp) %}
 <div class="flex flex-wrap justify-center gap-10 pb-10">
+    {% else %}
+<div class="flex flex-wrap justify-center gap-10 pt-10 pb-10">
+    {% endif %}
+
     <div class="container mx-auto flex flex-wrap justify-center items-center gap-4">
         <div class="flex basis-full justify-center">
             <a href="{{ url }}" class="center text-center text-5xl font-medium hover:text-slippi-green">{{ user.name }}</a>
