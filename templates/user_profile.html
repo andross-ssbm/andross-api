@@ -10,13 +10,13 @@
 <script src="{{ url_for('static', filename='js/slippi.js') }}"></script>
 <button onclick="refreshClick()">Refresh</button>
 <div class="flex flex-col my-2">
-    <div class="flex justify-end basis-full {{ '' if user.latest_dgp else 'hidden' }}">
+    <div id="dgp-container" class="flex justify-end basis-full {{ '' if user.latest_dgp else 'hidden' }}">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
             <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Global: </p>
             <p id="dgp" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_dgp }}</p>
         </div>
     </div>
-    <div class="flex justify-end basis-full  {{ '' if user.latest_drp else 'hidden' }}">
+    <div id="drp-container" class="flex justify-end basis-full  {{ '' if user.latest_drp else 'hidden' }}">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
             <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Regional: </p>
             <p id="drp" class="text-white text-right text-md font-medium inline pr-3 pt-3 pb-3">{{ user.latest_drp }}</p>
@@ -165,8 +165,10 @@ function refreshClick() {
 
     if (user.rankedNetplayProfile.daily_global_placement)
         document.getElementById('dgp').textContent = user.rankedNetplayProfile.daily_global_placement;
+        document.getElementById('dgp-container').classList.remove('hidden');
     if (user.rankedNetplayProfile.daily_regional_placement)
         document.getElementById('drp').textContent = user.rankedNetplayProfile.daily_regional_placement;
+        document.getElementById('drp-container').classList.remove('hidden');
 
     let rank_name = getRank(user.rankedNetplayProfile.ratingOrdinal, user.rankedNetplayProfile.daily_global_placement);
     document.getElementById('rank-name').textContent = rank_name;
