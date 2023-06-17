@@ -8,8 +8,10 @@
 {% set url = 'https://slippi.gg/user/' + user.cc.replace('#', '-') %}
 {% set cc = user.cc.upper() %}
 <script src="{{ url_for('static', filename='js/slippi.js') }}"></script>
-<button onclick="refreshClick()">Refresh</button>
 <div class="flex flex-col my-2">
+    <div class="flex justify-end basis-full">
+        <button class="bg-dark-theme-highlight rounded-lg m-2" onclick="refreshClick()">Refresh</button>
+    </div>
     <div id="dgp-container" class="flex justify-end basis-full {{ '' if user.latest_dgp else 'hidden' }}">
         <div class="bg-dark-theme-highlight rounded-lg mx-2 my-2">
             <p class="text-slate text-right text-sm font-medium pl-3 pt-3 pb-3 inline">Global: </p>
