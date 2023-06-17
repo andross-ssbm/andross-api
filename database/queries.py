@@ -235,6 +235,19 @@ def get_latest_leaderboard_entry():
     return lbe.to_dict()
 
 
+def get_leaderboard_position(user_id: int):
+    sql_query = '''
+    select count(*)+1 from users
+    where latest_elo > :user_elo
+    '''
+    user = User.query.filter(User.id == user_id).one()
+    if not user:
+        return {'position', None}, 200
+    results = db.session.execute(db.text(sql_query), {'user_elo': user.latest_elo}).one()
+    return {'position': results[0]}, 200
+
+
+
 def get_leaderboard():
     users = User.query.order_by(User.latest_elo.desc()).all()
     users = [user.to_dict() for user in users]

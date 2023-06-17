@@ -2,7 +2,7 @@ from flask import Blueprint
 from database.queries import get_users, get_users_by_id, get_users_by_cc, \
     get_elo_by_user_id, get_elo, get_latest_elo, get_latest_characters, \
     get_leaderboard, create_elo, create_win_loss, create_drp, create_entry_date, \
-    get_latest_leaderboard_entry, update_user, get_leaderboard_website_fast, user_profile
+    get_latest_leaderboard_entry, update_user, get_leaderboard_website_fast, user_profile, get_leaderboard_position
 from database.database_updater import update_database, update_leaderboard
 
 database_blueprint = Blueprint('database_blueprint', __name__)
@@ -11,6 +11,7 @@ database_blueprint.route("/rest/user/<int:user_id>", methods=['POST'])(update_us
 database_blueprint.route("/rest/users/", methods=['GET'])(get_users)
 database_blueprint.route("/rest/user/<int:user_id>", methods=['GET'])(get_users_by_id)
 database_blueprint.route("/rest/user/<string:user_cc>", methods=['GET'])(get_users_by_cc)
+database_blueprint.route("/rest/user/<int:user_id>/position", methods=['GET'])(get_leaderboard_position)
 database_blueprint.route("/rest/elo/user/<int:user_id>", methods=['GET'])(get_elo_by_user_id)
 database_blueprint.route("/rest/elo/", methods=['POST'])(create_elo)
 database_blueprint.route("/rest/elo/", methods=['GET'])(get_elo)
