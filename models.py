@@ -299,6 +299,9 @@ class DGP(db.Model):
         }
 
 
+event.listen(DGP.__table__, 'after_create', DGP.trigger)
+
+
 class Leaderboard(db.Model):
     __tablename__ = 'leaderboard'
 
