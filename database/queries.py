@@ -237,6 +237,14 @@ def get_latest_leaderboard_entry():
 
 def get_leaderboard_position(user_id: int):
     user = User.query.filter(User.id == user_id).first()
+
+    if not user:
+        return {'position': 0}, 200
+
+    new_elo = request.args.get('elo')
+    if new_elo:
+        user.latest_elo = float(new_elo)
+
     return {'position': user.get_position() if user else 0}, 200
 
 
