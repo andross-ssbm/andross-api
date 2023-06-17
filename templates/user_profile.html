@@ -152,10 +152,24 @@ getBasicEloGraph()
 
 cc = document.getElementById('cc').textContent
 fetchAccountData(cc, cc).then(user => {
+
+    const characters = user.rankedNetplayProfile.characters;
+    let totalGameCount = 0;
+
+    for (const character of characters) {
+        totalGameCount += character.gameCount;
+    }
+
     document.getElementById('rating').textContent = user.rankedNetplayProfile.ratingOrdinal.toFixed(2);
     document.getElementById('wins-text').textContent = user.rankedNetplayProfile.wins;
     document.getElementById('losses-text').textContent = user.rankedNetplayProfile.losses;
     document.getElementById('set-count').textContent = user.rankedNetplayProfile.wins + user.rankedNetplayProfile.losses;
+
+    for (const character of characters) {
+        document.getElementById(character.character + '-game-count').textContent = character.gameCount;
+        let usage = (character.gameCount/totalGameCount)*100;
+        document.getElementById(character.character + '-usage').textContent = usage.toFixed(2) + '%';
+    }
 });
 
 </script>
