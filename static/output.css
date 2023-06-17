@@ -560,6 +560,10 @@ video {
   position: static;
 }
 
+.m-2 {
+  margin: 0.5rem;
+}
+
 .m-6 {
   margin: 1.5rem;
 }
@@ -764,6 +768,10 @@ video {
   background-color: rgb(33 186 69 / var(--tw-bg-opacity));
 }
 
+.p-3 {
+  padding: 0.75rem;
+}
+
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
@@ -941,5 +949,9 @@ video {
 .group:hover .group-hover\:text-dark-theme-highlight {
   --tw-text-opacity: 1;
   color: rgb(43 45 49 / var(--tw-text-opacity));
+}
+
+.group:hover .group-hover\:text-white {
+  color: #FFFFFFFF;
 }
 
