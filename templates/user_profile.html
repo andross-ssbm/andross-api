@@ -163,14 +163,14 @@ function refreshClick() {
     document.getElementById('losses-text').textContent = user.rankedNetplayProfile.losses;
     document.getElementById('set-count').textContent = user.rankedNetplayProfile.wins + user.rankedNetplayProfile.losses;
 
-    if (user.rankedNetplayProfile.daily_global_placement)
-        document.getElementById('dgp').textContent = user.rankedNetplayProfile.daily_global_placement;
+    if (user.rankedNetplayProfile.dailyGlobalPlacement)
+        document.getElementById('dgp').textContent = user.rankedNetplayProfile.dailyGlobalPlacement;
         document.getElementById('dgp-container').classList.remove('hidden');
-    if (user.rankedNetplayProfile.daily_regional_placement)
-        document.getElementById('drp').textContent = user.rankedNetplayProfile.daily_regional_placement;
+    if (user.rankedNetplayProfile.dailyRegionalPlacement)
+        document.getElementById('drp').textContent = user.rankedNetplayProfile.dailyRegionalPlacement;
         document.getElementById('drp-container').classList.remove('hidden');
 
-    let rank_name = getRank(user.rankedNetplayProfile.ratingOrdinal, user.rankedNetplayProfile.daily_global_placement);
+    let rank_name = getRank(user.rankedNetplayProfile.ratingOrdinal, user.rankedNetplayProfile.dailyGlobalPlacement);
     document.getElementById('rank-name').textContent = rank_name;
     let rankImage = document.getElementById('rank-image');
     rankImage.src = '/static/images/ranks/' + rank_name.replace(/ /g, '_') + '.svg';
