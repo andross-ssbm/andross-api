@@ -5,7 +5,8 @@ from custom_logging import CustomFormatter
 
 logger = CustomFormatter().get_logger()
 
-from models import db, create_character_list
+# Ignore unused imports needed for migrations
+from models import db, create_character_list, Seasons, User, Elo, EntryDate, CharacterList, CharactersEntry, DRP, DGP, Leaderboard
 from database.routes import database_blueprint
 from graphs.routes import graphs_blueprint
 
@@ -13,11 +14,18 @@ app = Flask(__name__)
 
 app.config.from_object('config.Config')
 
-with app.app_context():
+def create_app():
     db.init_app(app)
-    db.create_all()
     create_character_list()
     migrate = Migrate(app, db)
+    migrate.init_app(app)
+
+
+with app.app_context():
+    db.init_app(app)
+    create_character_list()
+    migrate = Migrate(app, db)
+    migrate.init_app(app)
 
 app.register_blueprint(database_blueprint)
 app.register_blueprint(graphs_blueprint)
