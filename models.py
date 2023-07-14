@@ -23,6 +23,7 @@ class Seasons(db.Model):
     id: db.Mapped[int] = db.Column(db.BigInteger, primary_key=True)
     start_date: db.Mapped[datetime] = db.Column(db.DateTime, nullable=False)
     end_date: db.Mapped[datetime] = db.Column(db.DateTime, nullable=True)
+    is_current: db.Mapped[bool] = db.Column(db.Boolean, default=False)
 
 
 class User(db.Model):
