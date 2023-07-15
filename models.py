@@ -23,7 +23,32 @@ class Seasons(db.Model):
     id: db.Mapped[int] = db.Column(db.BigInteger, primary_key=True)
     start_date: db.Mapped[datetime] = db.Column(db.DateTime, nullable=False)
     end_date: db.Mapped[datetime] = db.Column(db.DateTime, nullable=True)
-    is_current: db.Mapped[bool] = db.Column(db.Boolean, default=False)
+    is_current: db.Mapped[bool] = db.Column(db.Boolean, nullable=True, default=False)
+
+    trigger = DDL("""
+                  CREATE OR REPLACE FUNCTION update_other_seasons()
+                  RETURNS TRIGGER AS $$
+                  BEGIN
+                  IF NEW.is_current = true THEN
+                  UPDATE seasons
+                  SET is_current = false
+                  WHERE is_current = true
+                  AND id <> NEW.id;
+                  END IF;
+
+                  RETURN NEW;
+                  END;
+                  $$ LANGUAGE plpgsql;
+
+                  CREATE TRIGGER update_seasons_trigger
+                  AFTER INSERT ON seasons
+                  FOR EACH ROW
+                  EXECUTE FUNCTION update_other_seasons();
+
+                  """)
+
+
+event.listen(Seasons.__table__, 'after_create', Seasons.trigger)
 
 
 class User(db.Model):
@@ -90,6 +115,19 @@ class User(db.Model):
         return latest_characters_entries
 
     def get_latest_characters_fast(self) -> Optional[list[dict]]:
+        sql_query_new = '''SELECT ce.*, cl.name
+FROM public.character_entry ce
+LEFT JOIN character_list cl ON ce.character_id = cl.id
+WHERE ce.user_id = :user_id1 and ce.entry_time = (
+	SELECT entry_time
+	FROM public.character_entry
+    WHERE user_id = :user_id2
+    AND entry_time <= :before_date
+	ORDER BY entry_time DESC
+	LIMIT 1
+)
+ORDER BY ce.game_count DESC'''
+
         sql_query = '''SELECT ce.*, cl.name
 FROM public.character_entry ce
 LEFT JOIN character_list cl ON ce.character_id = cl.id

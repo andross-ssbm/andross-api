@@ -3,9 +3,9 @@ from os import getenv
 from functools import wraps
 from datetime import datetime
 
-from flask import render_template, jsonify, request, abort
-from flask_sqlalchemy import SQLAlchemy
-from models import db, User, CharacterList, EntryDate, Elo, WinLoss, DRP, DGP, Leaderboard, CharactersEntry
+from flask import render_template, request, abort
+from sqlalchemy import True_
+from models import Seasons, db, User, EntryDate, Elo, WinLoss, DRP, DGP, Leaderboard, CharactersEntry
 from slippi.slippi_api import SlippiRankedAPI
 from slippi.slippi_ranks import get_rank
 
@@ -220,6 +220,26 @@ def create_drp():
     db.session.commit()
 
     return {'message': 'drp entry created successfully'}, 200
+
+
+@require_api_key
+def create_season():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    is_current = bool(request.args.get('is_current')) or False
+
+    if not start_date or not end_date:
+        return {'error_message': 'Missing required parameter start_date.'}, 400
+
+    start_date = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S.%f')
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S.%f')
+
+    season_entry = Seasons(start_date=start_date, end_date=end_date, is_current=is_current)
+    db.session.add(season_entry)
+    db.session.commit()
+
+    return {'message': 'seasons entry created successfully'}, 200
 
 
 def get_latest_leaderboard_entry():
