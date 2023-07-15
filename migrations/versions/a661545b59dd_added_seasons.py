@@ -24,6 +24,26 @@ def upgrade():
     sa.Column('end_date', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    trigger= '''
+        CREATE OR REPLACE FUNCTION update_other_seasons()
+        RETURNS TRIGGER AS $$
+        BEGIN
+        IF NEW.is_current = true THEN
+        UPDATE seasons
+        SET is_current = false
+        WHERE is_current = true
+        AND id <> NEW.id;
+        END IF;
+
+        RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        CREATE TRIGGER update_seasons_trigger
+        AFTER INSERT ON seasons
+        FOR EACH ROW
+        EXECUTE FUNCTION update_other_seasons();
+    '''
     # ### end Alembic commands ###
 
 
