@@ -139,10 +139,15 @@ def get_elo_by_user_id(user_id: int):
 
 
 def get_latest_elo(user_id: int):
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
     if not user_id:
-        latest_elo_entry = db.session.query(Elo).order_by(Elo.entry_time.desc())
+        latest_elo_entry = db.session.query(Elo).where(Elo.entry_time > current_season.start_date).order_by(Elo.entry_time.desc())
     else:
-        latest_elo_entry = db.session.query(Elo).where(Elo.user_id == int(user_id)).order_by(Elo.entry_time.desc())
+        latest_elo_entry = db.session.query(Elo).where(db.and_(Elo.user_id == int(user_id), Elo.entry_time > current_season.start_date)).order_by(Elo.entry_time.desc())
 
     latest_elo_entry = latest_elo_entry.first()
 
@@ -154,8 +159,17 @@ def get_latest_elo(user_id: int):
 
 def get_latest_characters(user_id: int):
 
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
     latest_character = db.session.query(CharactersEntry)\
-        .where(CharactersEntry.user_id == int(user_id)).order_by(CharactersEntry.entry_time.desc()).first()
+        .where(
+                db.and_(CharactersEntry.user_id == int(user_id), 
+                        CharactersEntry.entry_time > current_season.start_date))\
+                                .order_by(CharactersEntry.entry_time.desc()).first()
+
     if not latest_character:
         return {'error_message': f'No character entries for given user_id {user_id}'}
 
