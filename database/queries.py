@@ -116,7 +116,7 @@ def get_elo():
     end_date_arg = request.args.get('end_date')
     # if start/end_date_arg are none, sub in values
     start_date = datetime.strptime(start_date_arg if start_date_arg else '2020-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
-    end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d %H:%M:%S') if end_date_arg \
+    end_date = datetime.strptime(end_date_arg, '%Y-%m-%d %H:%M:%S') if end_date_arg \
         else datetime.utcnow()
 
     elo_entries = db.session.query(Elo)\
