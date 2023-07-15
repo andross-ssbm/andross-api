@@ -262,7 +262,14 @@ def get_latest_leaderboard_entry():
     if not user_id:
         return {'error_message': 'Missing required argument (id).'}, 400
 
-    lbe = Leaderboard.query.filter(Leaderboard.user_id == int(user_id)).order_by(Leaderboard.entry_time.desc()).first()
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
+    lbe = Leaderboard.query.where(db.and_(Leaderboard.user_id == int(user_id), 
+                                          Leaderboard.entry_time > current_season.start_date))\
+            .order_by(Leaderboard.entry_time.desc()).first()
     if not lbe:
         return {'error_message': f'Unable to get latest leaderboard entry for ({user_id})'}, 404
 
