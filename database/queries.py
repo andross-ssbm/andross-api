@@ -51,7 +51,7 @@ def update_user(user_id: int):
     cc = request.args.get('cc')
     name = request.args.get('name')
 
-    if not cc and not name:
+    if not cc or not name:
         return {'error_message': 'Missing both cc and name, please provide at least one.'}, 400
 
     user = db.session.query(User).filter(User.id == user_id).first()
