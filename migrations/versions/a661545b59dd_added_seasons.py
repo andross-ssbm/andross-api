@@ -44,6 +44,7 @@ def upgrade():
         FOR EACH ROW
         EXECUTE FUNCTION update_other_seasons();
     '''
+    op.execute(trigger)
     # ### end Alembic commands ###
 
 
