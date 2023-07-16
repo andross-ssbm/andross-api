@@ -67,6 +67,8 @@ class User(db.Model):
     latest_dgp: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
     latest_drp: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
 
+    is_michigan: db.Mapped[int] = db.Column(db.Boolean, nullable=False, server_default='true', default=True)
+
     main_character: db.Mapped['CharacterList'] = db.db.relationship('CharacterList', lazy='joined')
     elo_entries: db.Mapped[list['Elo']] = db.relationship('Elo')
     win_loss_entries: db.Mapped[list['WinLoss']] = db.relationship('WinLoss')
@@ -83,7 +85,7 @@ class User(db.Model):
 
     def __repr__(self):
         return f'User({self.id}, "{self.cc}", "{self.name}", {self.main_id}("{self.main_character.name}"), ' \
-               f'{self.slippi_id}, {self.latest_elo}, ({self.latest_wins}/{self.latest_losses}) )'
+               f'{self.slippi_id}, {self.latest_elo}, ({self.latest_wins}/{self.latest_losses}), {self.is_michigan})'
 
     def to_dict(self):
         return {
@@ -96,7 +98,8 @@ class User(db.Model):
             'latest_wins': self.latest_wins,
             'latest_losses': self.latest_losses,
             'latest_dgp': self.latest_dgp,
-            'latest_drp': self.latest_drp
+            'latest_drp': self.latest_drp,
+            'is_michigan': self.is_michigan
         }
 
     def get_latest_characters(self) -> Optional[list['CharactersEntry']]:
