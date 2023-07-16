@@ -16,14 +16,13 @@ app.config.from_object('config.Config')
 
 def create_app():
     db.init_app(app)
-    create_character_list()
     migrate = Migrate(app, db)
     migrate.init_app(app)
+    create_character_list()
 
 
 with app.app_context():
     db.init_app(app)
-    create_character_list()
     migrate = Migrate(app, db)
     migrate.init_app(app)
 
