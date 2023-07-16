@@ -25,6 +25,7 @@ with app.app_context():
     db.init_app(app)
     migrate = Migrate(app, db)
     migrate.init_app(app)
+    create_character_list()
 
 app.register_blueprint(database_blueprint)
 app.register_blueprint(graphs_blueprint)
