@@ -4,7 +4,7 @@ from functools import wraps
 from datetime import datetime
 
 from flask import render_template, request, abort
-from sqlalchemy import True_
+from sqlalchemy import CursorResult, True_
 from models import Seasons, db, User, EntryDate, Elo, WinLoss, DRP, DGP, Leaderboard, CharactersEntry
 from slippi.slippi_api import SlippiRankedAPI
 from slippi.slippi_ranks import get_rank
@@ -310,15 +310,15 @@ def get_leaderboard_website_fast():
 SELECT ce.*, cl.name AS character_name
 FROM users u
 LEFT JOIN (
-        SELECT ce.*
-        FROM public.character_entry ce
-        INNER JOIN (
-            SELECT user_id, MAX(entry_time) AS max_entry_time
-            FROM public.character_entry
-            GROUP BY user_id
-            ) ce_max ON ce.user_id = ce_max.user_id AND ce.entry_time = ce_max.max_entry_time
-        LEFT JOIN character_list cl ON ce.character_id = cl.id
-        ) ce ON u.id = ce.user_id
+    SELECT ce.*
+    FROM public.character_entry ce
+    INNER JOIN (
+        SELECT user_id, MAX(entry_time) AS max_entry_time
+        FROM public.character_entry
+        GROUP BY user_id
+    ) ce_max ON ce.user_id = ce_max.user_id AND ce.entry_time = ce_max.max_entry_time
+    LEFT JOIN character_list cl ON ce.character_id = cl.id
+) ce ON u.id = ce.user_id
 LEFT JOIN character_list cl ON ce.character_id = cl.id
 WHERE ce.entry_time > (SELECT start_date FROM public.seasons WHERE is_current = true)
 ORDER BY ce.game_count DESC, ce.user_id;
