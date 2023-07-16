@@ -306,20 +306,22 @@ def get_leaderboard_website():
 
 
 def get_leaderboard_website_fast():
-    sql_query = '''SELECT ce.*, cl.name AS character_name
+    sql_query = '''
+SELECT ce.*, cl.name AS character_name
 FROM users u
 LEFT JOIN (
-    SELECT ce.*
-    FROM public.character_entry ce
-    INNER JOIN (
-        SELECT user_id, MAX(entry_time) AS max_entry_time
-        FROM public.character_entry
-        GROUP BY user_id
-    ) ce_max ON ce.user_id = ce_max.user_id AND ce.entry_time = ce_max.max_entry_time
-    LEFT JOIN character_list cl ON ce.character_id = cl.id
-) ce ON u.id = ce.user_id
+        SELECT ce.*
+        FROM public.character_entry ce
+        INNER JOIN (
+            SELECT user_id, MAX(entry_time) AS max_entry_time
+            FROM public.character_entry
+            GROUP BY user_id
+            ) ce_max ON ce.user_id = ce_max.user_id AND ce.entry_time = ce_max.max_entry_time
+        LEFT JOIN character_list cl ON ce.character_id = cl.id
+        ) ce ON u.id = ce.user_id
 LEFT JOIN character_list cl ON ce.character_id = cl.id
-order by ce.game_count DESC, ce.user_id;
+WHERE ce.entry_time > (SELECT start_date FROM public.seasons WHERE is_current = true)
+ORDER BY ce.game_count DESC, ce.user_id;
 '''
     users = User.query.order_by(User.latest_elo.desc()).all()
     results = db.session.execute(db.text(sql_query)).all()
