@@ -3,9 +3,8 @@ from os import getenv
 from functools import wraps
 from datetime import datetime
 
-from flask import render_template, jsonify, request, abort
-from flask_sqlalchemy import SQLAlchemy
-from models import db, User, CharacterList, EntryDate, Elo, WinLoss, DRP, DGP, Leaderboard, CharactersEntry
+from flask import render_template, request, abort
+from models import Seasons, db, User, EntryDate, Elo, WinLoss, DRP, Leaderboard, CharactersEntry
 from slippi.slippi_api import SlippiRankedAPI
 from slippi.slippi_ranks import get_rank
 
@@ -51,7 +50,7 @@ def update_user(user_id: int):
     cc = request.args.get('cc')
     name = request.args.get('name')
 
-    if not cc and not name:
+    if not cc or not name:
         return {'error_message': 'Missing both cc and name, please provide at least one.'}, 400
 
     user = db.session.query(User).filter(User.id == user_id).first()
@@ -116,7 +115,7 @@ def get_elo():
     end_date_arg = request.args.get('end_date')
     # if start/end_date_arg are none, sub in values
     start_date = datetime.strptime(start_date_arg if start_date_arg else '2020-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
-    end_date = datetime.strptime(request.args.get('end_date'), '%Y-%m-%d %H:%M:%S') if end_date_arg \
+    end_date = datetime.strptime(end_date_arg, '%Y-%m-%d %H:%M:%S') if end_date_arg \
         else datetime.utcnow()
 
     elo_entries = db.session.query(Elo)\
@@ -139,10 +138,15 @@ def get_elo_by_user_id(user_id: int):
 
 
 def get_latest_elo(user_id: int):
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
     if not user_id:
-        latest_elo_entry = db.session.query(Elo).order_by(Elo.entry_time.desc())
+        latest_elo_entry = db.session.query(Elo).where(Elo.entry_time > current_season.start_date).order_by(Elo.entry_time.desc())
     else:
-        latest_elo_entry = db.session.query(Elo).where(Elo.user_id == int(user_id)).order_by(Elo.entry_time.desc())
+        latest_elo_entry = db.session.query(Elo).where(db.and_(Elo.user_id == int(user_id), Elo.entry_time > current_season.start_date)).order_by(Elo.entry_time.desc())
 
     latest_elo_entry = latest_elo_entry.first()
 
@@ -154,8 +158,17 @@ def get_latest_elo(user_id: int):
 
 def get_latest_characters(user_id: int):
 
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
     latest_character = db.session.query(CharactersEntry)\
-        .where(CharactersEntry.user_id == int(user_id)).order_by(CharactersEntry.entry_time.desc()).first()
+        .where(
+                db.and_(CharactersEntry.user_id == int(user_id), 
+                        CharactersEntry.entry_time > current_season.start_date))\
+                                .order_by(CharactersEntry.entry_time.desc()).first()
+
     if not latest_character:
         return {'error_message': f'No character entries for given user_id {user_id}'}
 
@@ -222,13 +235,40 @@ def create_drp():
     return {'message': 'drp entry created successfully'}, 200
 
 
+@require_api_key
+def create_season():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    is_current = bool(request.args.get('is_current')) or False
+
+    if not start_date or not end_date:
+        return {'error_message': 'Missing required parameter start_date.'}, 400
+
+    start_date = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S.%f')
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S.%f')
+
+    season_entry = Seasons(start_date=start_date, end_date=end_date, is_current=is_current)
+    db.session.add(season_entry)
+    db.session.commit()
+
+    return {'message': 'seasons entry created successfully'}, 200
+
+
 def get_latest_leaderboard_entry():
     user_id = request.args.get('id')
 
     if not user_id:
         return {'error_message': 'Missing required argument (id).'}, 400
 
-    lbe = Leaderboard.query.filter(Leaderboard.user_id == int(user_id)).order_by(Leaderboard.entry_time.desc()).first()
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
+    lbe = Leaderboard.query.where(db.and_(Leaderboard.user_id == int(user_id), 
+                                          Leaderboard.entry_time > current_season.start_date))\
+            .order_by(Leaderboard.entry_time.desc()).first()
     if not lbe:
         return {'error_message': f'Unable to get latest leaderboard entry for ({user_id})'}, 404
 
@@ -249,7 +289,7 @@ def get_leaderboard_position(user_id: int):
 
 
 def get_leaderboard():
-    users = User.query.order_by(User.latest_elo.desc()).all()
+    users = User.query.filter_by(is_michigan = True).order_by(User.latest_elo.desc()).all()
     users = [user.to_dict() for user in users]
 
     for i, user in enumerate(users):
@@ -259,13 +299,14 @@ def get_leaderboard():
 
 
 def get_leaderboard_website():
-    users = User.query.order_by(User.latest_elo.desc()).all()
+    users = User.query.filter_by(is_michigan = True).order_by(User.latest_elo.desc()).all()
     characters = [user.get_latest_characters() or [] for user in users]
     return render_template('leaderboard.html', users=users, get_rank=get_rank, characters=characters)
 
 
 def get_leaderboard_website_fast():
-    sql_query = '''SELECT ce.*, cl.name AS character_name
+    sql_query = '''
+SELECT ce.*, cl.name AS character_name
 FROM users u
 LEFT JOIN (
     SELECT ce.*
@@ -278,7 +319,8 @@ LEFT JOIN (
     LEFT JOIN character_list cl ON ce.character_id = cl.id
 ) ce ON u.id = ce.user_id
 LEFT JOIN character_list cl ON ce.character_id = cl.id
-order by ce.game_count DESC, ce.user_id;
+WHERE ce.entry_time > (SELECT start_date FROM public.seasons WHERE is_current = true) AND u.is_michigan = True
+ORDER BY ce.game_count DESC, ce.user_id;
 '''
     users = User.query.order_by(User.latest_elo.desc()).all()
     results = db.session.execute(db.text(sql_query)).all()
@@ -301,7 +343,13 @@ order by ce.game_count DESC, ce.user_id;
 def user_profile(user_id: int):
     user = db.get_or_404(User, user_id, description='Unable to get user')
     characters = user.get_latest_characters_fast()
+    if not user.latest_wins and not user.latest_losses:
+        user_rank = 'None'
+    elif (user.latest_wins + user.latest_losses) < 5:
+        user_rank = 'Pending'
+    else:
+        user_rank = get_rank(user.latest_elo, user.latest_dgp)
     return render_template('user_profile.html',
                            user=user,
-                           user_rank=get_rank(user.latest_elo, user.latest_dgp),
-                           characters=characters)
+                           user_rank=user_rank,
+                           characters=characters or [])

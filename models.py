@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 from datetime import datetime
 from typing import Optional
@@ -16,10 +17,44 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 db = SQLAlchemy()
 
 
+class Seasons(db.Model):
+    __tablename__ = 'seasons'
+
+    id: db.Mapped[int] = db.Column(db.BigInteger, primary_key=True)
+    start_date: db.Mapped[datetime] = db.Column(db.DateTime, nullable=False)
+    end_date: db.Mapped[datetime] = db.Column(db.DateTime, nullable=True)
+    is_current: db.Mapped[bool] = db.Column(db.Boolean, nullable=True, default=False)
+
+    trigger = DDL("""
+                  CREATE OR REPLACE FUNCTION update_other_seasons()
+                  RETURNS TRIGGER AS $$
+                  BEGIN
+                  IF NEW.is_current = true THEN
+                  UPDATE seasons
+                  SET is_current = false
+                  WHERE is_current = true
+                  AND id <> NEW.id;
+                  END IF;
+
+                  RETURN NEW;
+                  END;
+                  $$ LANGUAGE plpgsql;
+
+                  CREATE TRIGGER update_seasons_trigger
+                  AFTER INSERT ON seasons
+                  FOR EACH ROW
+                  EXECUTE FUNCTION update_other_seasons();
+
+                  """)
+
+
+event.listen(Seasons.__table__, 'after_create', Seasons.trigger)
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
-    id: db.Mapped[int] = db.db.Column(db.BigInteger, primary_key=True)
+    id: db.Mapped[int] = db.Column(db.BigInteger, primary_key=True)
     cc: db.Mapped[str] = db.Column(db.String(10), unique=True, nullable=False)
     name: db.Mapped[str] = db.Column(db.String(14), nullable=False)
     main_id: db.Mapped[int] = db.Column(db.Integer, db.ForeignKey('character_list.id'), server_default='256',
@@ -31,6 +66,8 @@ class User(db.Model):
     latest_losses: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
     latest_dgp: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
     latest_drp: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
+
+    is_michigan: db.Mapped[int] = db.Column(db.Boolean, nullable=False, server_default='true', default=True)
 
     main_character: db.Mapped['CharacterList'] = db.db.relationship('CharacterList', lazy='joined')
     elo_entries: db.Mapped[list['Elo']] = db.relationship('Elo')
@@ -48,7 +85,7 @@ class User(db.Model):
 
     def __repr__(self):
         return f'User({self.id}, "{self.cc}", "{self.name}", {self.main_id}("{self.main_character.name}"), ' \
-               f'{self.slippi_id}, {self.latest_elo}, ({self.latest_wins}/{self.latest_losses}) )'
+               f'{self.slippi_id}, {self.latest_elo}, ({self.latest_wins}/{self.latest_losses}), {self.is_michigan})'
 
     def to_dict(self):
         return {
@@ -61,10 +98,11 @@ class User(db.Model):
             'latest_wins': self.latest_wins,
             'latest_losses': self.latest_losses,
             'latest_dgp': self.latest_dgp,
-            'latest_drp': self.latest_drp
+            'latest_drp': self.latest_drp,
+            'is_michigan': self.is_michigan
         }
 
-    def get_latest_characters(self) -> Optional['CharactersEntry']:
+    def get_latest_characters(self) -> Optional[list['CharactersEntry']]:
         latest_character = db.session.query(CharactersEntry) \
             .where(CharactersEntry.user_id == self.id).order_by(CharactersEntry.entry_time.desc()).first()
         if not latest_character:
@@ -79,17 +117,25 @@ class User(db.Model):
 
         return latest_characters_entries
 
-    def get_latest_characters_fast(self) -> Optional[dict]:
-        sql_query = '''SELECT ce.*, cl.name
+    def get_latest_characters_fast(self) -> Optional[list[dict]]:
+        sql_query = '''
+        SELECT ce.*, cl.name
 FROM public.character_entry ce
 LEFT JOIN character_list cl ON ce.character_id = cl.id
-WHERE ce.user_id = :user_id1
-AND ce.entry_time = (
-    SELECT MAX(entry_time)
-    FROM public.character_entry
-    WHERE user_id = :user_id2
-)
-ORDER BY ce.game_count DESC'''
+WHERE ce.user_id = :user_id1 AND ce.entry_time = (
+        SELECT entry_time
+        FROM public.character_entry
+        WHERE user_id = :user_id2
+        AND entry_time > (
+            SELECT start_date
+            FROM public.seasons
+            WHERE is_current = true
+            )
+        ORDER BY entry_time DESC
+        LIMIT 1
+        )
+ORDER BY ce.game_count DESC;
+        '''
 
         characters_list = db.session.execute(db.text(sql_query), {'user_id1': self.id, 'user_id2': self.id}).all()
         if not characters_list:

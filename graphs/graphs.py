@@ -10,7 +10,7 @@ from flask import request, abort, send_file
 from slippi.slippi_characters import SlippiCharacterColors
 from slippi.slippi_ranks import rank_list
 
-from models import db, User, Elo, CharactersEntry
+from models import Seasons, db, User, Elo, CharactersEntry
 
 matplotlib.use('Agg')
 logger = logging.getLogger(f'andross.{__name__}')
@@ -72,8 +72,13 @@ def get_character_usage_pie():
 
     user = db.get_or_404(User, user_id, description='User not found')
 
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
     latest_character = db.session.query(CharactersEntry)\
-        .where(CharactersEntry.user_id == int(user_id))\
+        .where(db.and_(CharactersEntry.user_id == int(user_id), CharactersEntry.entry_time > current_season.start_date))\
         .order_by(CharactersEntry.entry_time.desc()).first()
 
     if not latest_character:
@@ -136,7 +141,17 @@ def get_basic_elo_graph():
     x_axis = []
     y_axis = []
 
-    for elo_entry in user.elo_entries:
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
+    elo_entries = db.session.query(Elo).where(
+            db.and_(Elo.user_id == user.id, Elo.entry_time > current_season.start_date)).all()
+    if not elo_entries:
+        return {'error_message': 'Unable to get elo_entries'}, 404
+
+    for elo_entry in elo_entries:
         x_axis.append(elo_entry.entry_time)
         y_axis.append(elo_entry.elo)
 

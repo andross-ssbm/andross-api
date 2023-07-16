@@ -103,10 +103,16 @@ const rank_list = [
   new Rank(2350, Infinity, 'Master 3')
 ];
 
-function getRank(elo, dailyGlobalPlacement) {
-  console.log(`getRank: ${elo}, ${dailyGlobalPlacement}`);
+function getRank(elo, dailyGlobalPlacement, wins, losses) {
+  console.log('getRank: ${elo}, ${dailyGlobalPlacement}');
+    if (wins === null && losses === null) {
+        return 'None'
+    }
+    else if ((wins + losses) < 5) {
+        return 'Pending'
+    }
 
-  if (dailyGlobalPlacement !== null) {
+    if (dailyGlobalPlacement !== null && elo > grand_master.lower_bound) {
     return grand_master.rank_name;
   }
 

@@ -1,5 +1,5 @@
 from flask import Blueprint
-from database.queries import get_users, get_users_by_id, get_users_by_cc, \
+from database.queries import create_season, get_users, get_users_by_id, get_users_by_cc, \
     get_elo_by_user_id, get_elo, get_latest_elo, get_latest_characters, \
     get_leaderboard, create_elo, create_win_loss, create_drp, create_entry_date, \
     get_latest_leaderboard_entry, update_user, get_leaderboard_website_fast, user_profile, get_leaderboard_position
@@ -20,6 +20,7 @@ database_blueprint.route("/rest/characters/user/<int:user_id>/latest", methods=[
 database_blueprint.route("/rest/entry_date/", methods=['POST'])(create_entry_date)
 database_blueprint.route("/rest/win_loss/", methods=['POST'])(create_win_loss)
 database_blueprint.route("/rest/drp/", methods=['POST'])(create_drp)
+database_blueprint.route("/rest/seasons/", methods=['POST'])(create_season)
 database_blueprint.route("/rest/update/", methods=['POST'])(update_database)
 database_blueprint.route("/rest/update_leaderboard/", methods=['POST'])(update_leaderboard)
 database_blueprint.route("/rest/get_lbe/", methods=['GET'])(get_latest_leaderboard_entry)
