@@ -289,7 +289,7 @@ def get_leaderboard_position(user_id: int):
 
 
 def get_leaderboard():
-    users = User.query.order_by(User.latest_elo.desc()).all()
+    users = User.query.filter_by(is_michigan = True).order_by(User.latest_elo.desc()).all()
     users = [user.to_dict() for user in users]
 
     for i, user in enumerate(users):
