@@ -167,9 +167,9 @@ function refreshClick() {
     }
 
     document.getElementById('rating').textContent = user.rankedNetplayProfile.ratingOrdinal.toFixed(2);
-    document.getElementById('wins-text').textContent = user.rankedNetplayProfile.wins;
-    document.getElementById('losses-text').textContent = user.rankedNetplayProfile.losses;
-    document.getElementById('set-count').textContent = user.rankedNetplayProfile.wins + user.rankedNetplayProfile.losses;
+    document.getElementById('wins-text').textContent = user.rankedNetplayProfile.wins || 0;
+    document.getElementById('losses-text').textContent = user.rankedNetplayProfile.losses || 0;
+    document.getElementById('set-count').textContent = (user.rankedNetplayProfile.wins + user.rankedNetplayProfile.losses) || 0;
 
     if (user.rankedNetplayProfile.dailyGlobalPlacement !== null) {
         document.getElementById('dgp').textContent = user.rankedNetplayProfile.dailyGlobalPlacement;
@@ -180,7 +180,7 @@ function refreshClick() {
         document.getElementById('drp-container').classList.remove('hidden');
     }
 
-    let rank_name = getRank(user.rankedNetplayProfile.ratingOrdinal, user.rankedNetplayProfile.dailyGlobalPlacement);
+    let rank_name = getRank(user.rankedNetplayProfile.ratingOrdinal, user.rankedNetplayProfile.dailyGlobalPlacement, user.rankedNetplayProfile.wins, user.rankedNetplayProfile.losses);
     document.getElementById('rank-name').textContent = rank_name;
     let rankImage = document.getElementById('rank-image');
     rankImage.src = '/static/images/ranks/' + rank_name.replace(/ /g, '_') + '.svg';
