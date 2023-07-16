@@ -159,7 +159,7 @@ ORDER BY ce.game_count DESC;
     def get_position(self, sub_elo: float = None):
         sql_query = '''
             select count(*)+1 from users
-            where latest_elo > :user_elo
+            where latest_elo > :user_elo and is_michigan = true
             '''
         results = db.session.execute(db.text(sql_query), {'user_elo': sub_elo if sub_elo else self.latest_elo}).one()
         return results[0] if results else 0
