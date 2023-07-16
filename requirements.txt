@@ -4,7 +4,7 @@ SQLAlchemy~=2.0.15
 Flask-Migrate~=4.0.4
 psycopg2-binary~=2.9.6
 gunicorn~=20.1.0
-slippy-api==0.9
+slippy-api==0.8
 tzdata~=2023.3
 matplotlib~=3.7.1
 requests~=2.29.0
