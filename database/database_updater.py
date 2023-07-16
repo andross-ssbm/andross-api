@@ -23,7 +23,7 @@ def update_leaderboard():
     db.session.add(entry_date)
     db.session.commit()
 
-    users_list = User.query.all()
+    users_list = User.query.filter_by(is_michigan = True).all()
     if not users_list:
         return {'error_message': 'Unable to get users'}, 404
 
