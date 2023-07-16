@@ -299,7 +299,7 @@ def get_leaderboard():
 
 
 def get_leaderboard_website():
-    users = User.query.order_by(User.latest_elo.desc()).all()
+    users = User.query.filter_by(is_michigan = True).order_by(User.latest_elo.desc()).all()
     characters = [user.get_latest_characters() or [] for user in users]
     return render_template('leaderboard.html', users=users, get_rank=get_rank, characters=characters)
 
@@ -319,7 +319,7 @@ LEFT JOIN (
     LEFT JOIN character_list cl ON ce.character_id = cl.id
 ) ce ON u.id = ce.user_id
 LEFT JOIN character_list cl ON ce.character_id = cl.id
-WHERE ce.entry_time > (SELECT start_date FROM public.seasons WHERE is_current = true)
+WHERE ce.entry_time > (SELECT start_date FROM public.seasons WHERE is_current = true) AND u.is_michigan = True
 ORDER BY ce.game_count DESC, ce.user_id;
 '''
     users = User.query.order_by(User.latest_elo.desc()).all()
