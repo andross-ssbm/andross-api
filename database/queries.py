@@ -322,7 +322,7 @@ LEFT JOIN character_list cl ON ce.character_id = cl.id
 WHERE ce.entry_time > (SELECT start_date FROM public.seasons WHERE is_current = true) AND u.is_michigan = True
 ORDER BY ce.game_count DESC, ce.user_id;
 '''
-    users = User.query.order_by(User.latest_elo.desc()).all()
+    users = User.query.filter_by(is_michigan = True).order_by(User.latest_elo.desc()).all()
     results = db.session.execute(db.text(sql_query)).all()
     character_dict_list = {}
     for item in results:
