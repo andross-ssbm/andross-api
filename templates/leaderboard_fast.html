@@ -20,8 +20,18 @@
       {% for user in users %}
         <tr>
           <td class="border-b border-background-dark text-center text-4xl font-bold">{{ loop.index }}</td>
-          {% set rank = get_rank(user.latest_elo, user.latest_dgp).replace(' ', '_') %}
-          {% set rank_name = get_rank(user.latest_elo, user.latest_dgp) %}
+          {% set isNone = (not user.latest_wins and not user.latest_losses) %}
+          {% set isPending = (user.latest_wins + user.latest_losses < 5) %}
+          {% if isNone %}
+              {% set rank = 'None' %}
+              {% set rank_name = 'None' %}
+          {% elif isPending %}
+              {% set rank = 'Pending' %}
+              {% set rank_name = 'Pending' %}
+          {% else %}
+              {% set rank = get_rank(user.latest_elo, user.latest_dgp).replace(' ', '_') %}
+              {% set rank_name = get_rank(user.latest_elo, user.latest_dgp) %}
+          {% endif %}
           {% set url = url_for('database_blueprint.user_profile', user_id=user.id) %}
           <td class="border-b border-background-dark px-4 py-4">
             <div class="flex flex-wrap">
