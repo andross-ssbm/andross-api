@@ -4,8 +4,7 @@ from functools import wraps
 from datetime import datetime
 
 from flask import render_template, request, abort
-from sqlalchemy import CursorResult, True_
-from models import Seasons, db, User, EntryDate, Elo, WinLoss, DRP, DGP, Leaderboard, CharactersEntry
+from models import Seasons, db, User, EntryDate, Elo, WinLoss, DRP, Leaderboard, CharactersEntry
 from slippi.slippi_api import SlippiRankedAPI
 from slippi.slippi_ranks import get_rank
 
