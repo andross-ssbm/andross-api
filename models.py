@@ -115,29 +115,24 @@ class User(db.Model):
         return latest_characters_entries
 
     def get_latest_characters_fast(self) -> Optional[list[dict]]:
-        sql_query_new = '''SELECT ce.*, cl.name
+        sql_query = '''
+        SELECT ce.*, cl.name
 FROM public.character_entry ce
 LEFT JOIN character_list cl ON ce.character_id = cl.id
-WHERE ce.user_id = :user_id1 and ce.entry_time = (
-	SELECT entry_time
-	FROM public.character_entry
-    WHERE user_id = :user_id2
-    AND entry_time <= :before_date
-	ORDER BY entry_time DESC
-	LIMIT 1
-)
-ORDER BY ce.game_count DESC'''
-
-        sql_query = '''SELECT ce.*, cl.name
-FROM public.character_entry ce
-LEFT JOIN character_list cl ON ce.character_id = cl.id
-WHERE ce.user_id = :user_id1
-AND ce.entry_time = (
-    SELECT MAX(entry_time)
-    FROM public.character_entry
-    WHERE user_id = :user_id2
-)
-ORDER BY ce.game_count DESC'''
+WHERE ce.user_id = :user_id1 AND ce.entry_time = (
+        SELECT entry_time
+        FROM public.character_entry
+        WHERE user_id = :user_id2
+        AND entry_time > (
+            SELECT start_date
+            FROM public.seasons
+            WHERE is_current = true
+            )
+        ORDER BY entry_time DESC
+        LIMIT 1
+        )
+ORDER BY ce.game_count DESC;
+        '''
 
         characters_list = db.session.execute(db.text(sql_query), {'user_id1': self.id, 'user_id2': self.id}).all()
         if not characters_list:
