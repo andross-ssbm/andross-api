@@ -343,7 +343,13 @@ ORDER BY ce.game_count DESC, ce.user_id;
 def user_profile(user_id: int):
     user = db.get_or_404(User, user_id, description='Unable to get user')
     characters = user.get_latest_characters_fast()
+    if not user.latest_wins and not user.latest_losses:
+        user_rank = 'None'
+    elif (user.latest_wins + user.latest_losses) < 5:
+        user_rank = 'Pending'
+    else:
+        user_rank = get_rank(user.latest_elo, user.latest_dgp)
     return render_template('user_profile.html',
                            user=user,
-                           user_rank=get_rank(user.latest_elo, user.latest_dgp),
+                           user_rank=user_rank,
                            characters=characters or [])
