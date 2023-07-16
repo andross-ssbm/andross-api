@@ -72,8 +72,13 @@ def get_character_usage_pie():
 
     user = db.get_or_404(User, user_id, description='User not found')
 
+    current_season = db.session.query(Seasons)\
+            .where(Seasons.is_current == True).first()
+    if not current_season:
+        return {'error_message': 'Unable to get current seasons'}, 404
+
     latest_character = db.session.query(CharactersEntry)\
-        .where(CharactersEntry.user_id == int(user_id))\
+        .where(db.and_(CharactersEntry.user_id == int(user_id), CharactersEntry.entry_time > current_season.start_date))\
         .order_by(CharactersEntry.entry_time.desc()).first()
 
     if not latest_character:
