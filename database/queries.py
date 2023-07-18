@@ -322,7 +322,8 @@ LEFT JOIN character_list cl ON ce.character_id = cl.id
 WHERE ce.entry_time > (SELECT start_date FROM public.seasons WHERE is_current = true) AND u.is_michigan = True
 ORDER BY ce.game_count DESC, ce.user_id;
 '''
-    users = User.query.filter_by(is_michigan = True).order_by(User.latest_elo.desc()).all()
+    users = User.query.filter(User.is_michigan == True, (User.latest_wins + User.latest_losses) >= 5).order_by(User.latest_elo.desc()).all()
+    pending_users = User.query.filter(User.is_michigan == True, (User.latest_wins + User.latest_losses) < 5, (User.latest_wins + User.latest_losses) > 0).order_by(User.latest_elo.desc()).all()
     results = db.session.execute(db.text(sql_query)).all()
     character_dict_list = {}
     for item in results:
@@ -337,7 +338,7 @@ ORDER BY ce.game_count DESC, ce.user_id;
             'entry_time': item[4],
             'name': item[5]
         })
-    return render_template('leaderboard_fast.html', users=users, get_rank=get_rank, characters=character_dict_list)
+    return render_template('leaderboard_fast.html', users=users, pusers=pending_users, get_rank=get_rank, characters=character_dict_list)
 
 
 def user_profile(user_id: int):
