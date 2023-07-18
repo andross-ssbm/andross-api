@@ -289,8 +289,11 @@ def get_leaderboard_position(user_id: int):
 
 
 def get_leaderboard():
-    users = User.query.filter_by(is_michigan = True).order_by(User.latest_elo.desc()).all()
+    users = User.query.filter(User.is_michigan == True, (User.latest_wins + User.latest_losses) >= 5).order_by(User.latest_elo.desc()).all()
+    pending_users = User.query.filter(User.is_michigan == True, (User.latest_wins + User.latest_losses) < 5, (User.latest_wins + User.latest_losses) > 0).order_by(User.latest_elo.desc()).all()
     users = [user.to_dict() for user in users]
+    pending_users = [puser.to_dict() for puser in pending_users]
+    users = users + pending_users
 
     for i, user in enumerate(users):
         user['position'] = i + 1
