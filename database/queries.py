@@ -2,6 +2,7 @@ import logging
 from os import getenv
 from functools import wraps
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from flask import render_template, request, abort
 from models import Seasons, db, User, EntryDate, Elo, WinLoss, DRP, Leaderboard, CharactersEntry
@@ -328,6 +329,13 @@ ORDER BY ce.game_count DESC, ce.user_id;
     users = User.query.filter(User.is_michigan == True, (User.latest_wins + User.latest_losses) >= 5).order_by(User.latest_elo.desc()).all()
     pending_users = User.query.filter(User.is_michigan == True, (User.latest_wins + User.latest_losses) < 5, (User.latest_wins + User.latest_losses) > 0).order_by(User.latest_elo.desc()).all()
     results = db.session.execute(db.text(sql_query)).all()
+    latest_elo = Elo.query.order_by(Elo.entry_time.desc()).first()
+    if not latest_elo:
+        last_update = 'Unable to get last update'
+    else:
+        latest_time = latest_elo.entry_time.replace(tzinfo=ZoneInfo('UTC'))
+        last_update = latest_time.astimezone(tz=ZoneInfo('America/Detroit')).strftime("%I:%M %p")
+
     character_dict_list = {}
     for item in results:
         main_key = item[1]  # Using the second index as the main key
@@ -341,7 +349,7 @@ ORDER BY ce.game_count DESC, ce.user_id;
             'entry_time': item[4],
             'name': item[5]
         })
-    return render_template('leaderboard_fast.html', users=users, pusers=pending_users, get_rank=get_rank, characters=character_dict_list)
+    return render_template('leaderboard_fast.html', users=users, pusers=pending_users, get_rank=get_rank, characters=character_dict_list, last_update=last_update)
 
 
 def user_profile(user_id: int):
