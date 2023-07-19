@@ -1,7 +1,7 @@
 import logging
 from os import getenv
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from flask import render_template, request, abort
@@ -332,9 +332,11 @@ ORDER BY ce.game_count DESC, ce.user_id;
     latest_elo = Elo.query.order_by(Elo.entry_time.desc()).first()
     if not latest_elo:
         last_update = 'Unable to get last update'
+        next_update = 'Unknown'
     else:
         latest_time = latest_elo.entry_time.replace(tzinfo=ZoneInfo('UTC'))
         last_update = latest_time.astimezone(tz=ZoneInfo('America/Detroit')).strftime("%I:%M %p")
+        next_update = (latest_time + timedelta(minutes=20)).astimezone(tz=ZoneInfo('America/Detroit')).strftime("%I:%M %p")
 
     character_dict_list = {}
     for item in results:
@@ -349,7 +351,7 @@ ORDER BY ce.game_count DESC, ce.user_id;
             'entry_time': item[4],
             'name': item[5]
         })
-    return render_template('leaderboard_fast.html', users=users, pusers=pending_users, get_rank=get_rank, characters=character_dict_list, last_update=last_update)
+    return render_template('leaderboard_fast.html', users=users, pusers=pending_users, get_rank=get_rank, characters=character_dict_list, last_update=last_update, next_update=next_update)
 
 
 def user_profile(user_id: int):
