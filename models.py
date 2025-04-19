@@ -59,7 +59,7 @@ class User(db.Model):
     name: db.Mapped[str] = db.Column(db.String(14), nullable=False)
     main_id: db.Mapped[int] = db.Column(db.Integer, db.ForeignKey('character_list.id'), server_default='256',
                                         default=256)
-    slippi_id: db.Mapped[int] = db.Column(db.BigInteger, server_default='0', default=0)
+    slippi_id: db.Mapped[int] = db.Column(db.String(64), server_default='0', default=0)
     latest_elo: db.Mapped[float] = db.Column(db.Double, nullable=False,
                                              server_default='1100.0', default=0)
     latest_wins: db.Mapped[int] = db.Column(db.Integer, nullable=False, server_default='0', default=0)
