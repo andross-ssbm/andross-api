@@ -135,6 +135,7 @@ def update_database():
             db.session.add(dgp_entry)
             db.session.commit()
 
+        """
         # Create character_entry for user
         logger.info('Update characters')
         if len(slippi_user.ranked_profile.characters):
@@ -174,6 +175,7 @@ def update_database():
                     dk_claus=True)
                 local_user.main_id = main_id
                 db.session.commit()
+        """
 
         logger.info(f'Updated {local_user}')
 
